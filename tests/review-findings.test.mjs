@@ -4,7 +4,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { root, loadWorkflow, runOne, alertFor, runFindNew, channelConfig, hasWorkflow } from './helpers.mjs';
+import { root, loadWorkflow, runOne, alertFor, runFindNew, channelConfig, runCheckSettings, hasWorkflow } from './helpers.mjs';
+
+const BASE_SETTINGS = {
+  channels: 'durov',
+  keywords: 'n8n',
+  excludeKeywords: '',
+  matchWholeWords: true,
+  telegramChatId: '12345',
+  maxAlertsPerRun: 10,
+  baselineOnFirstRun: true,
+  previewBaseUrl: 'https://t.me/s/',
+};
+const settingsCfg = (o) => ({ ...BASE_SETTINGS, ...o });
 
 function built() {
   if (!hasWorkflow()) {
@@ -96,4 +108,44 @@ test('AC19: one dead item does not stop a healthy channel in the same run', () =
   }).out.map((i) => i.json);
   assert.equal(out.filter((j) => j.kind === 'notice').length, 1, 'ghost gets one notice');
   assert.equal(out.filter((j) => j.kind === 'alert').length, 1, 'durov still alerts');
+});
+
+test('AC9: two post blocks with the same data-post id on one page produce only one alert', () => {
+  if (!built()) return;
+  const inputItems = [
+    { postId: 'durov/5', text: 'first match', isoDate: '2026-07-16T20:45:25+00:00', url: 'https://t.me/durov/5', views: '1K' },
+    { postId: 'durov/5', text: 'second match', isoDate: '2026-07-16T20:46:25+00:00', url: 'https://t.me/durov/5', views: '2K' },
+    { postId: 'durov/9', text: 'no keyword here', isoDate: '2026-07-16T20:47:25+00:00', url: 'https://t.me/durov/9', views: '3K' },
+  ];
+  const staticData = {};
+  const out = runFindNew({
+    inputItems,
+    channelItems: [channelConfig('durov', { keywords: ['match'], baselineOnFirstRun: false })],
+    staticData,
+  }).out.map((i) => i.json);
+  const alerts = out.filter((j) => j.kind === 'alert');
+  assert.equal(alerts.length, 1, 'the duplicate post id should alert only once, got ' + alerts.length);
+  assert.equal(alerts[0].postId, 5);
+  assert.ok(alerts[0].snippet.includes('first'), 'the first occurrence on the page is kept');
+  assert.equal(staticData.lastSeen_durov, 9, 'state still advances to the highest id seen on the page');
+});
+
+test('AC4: rejects maxAlertsPerRun given as the boolean true', () => {
+  if (!built()) return;
+  // Number(true) is 1, which previously slipped past the positive-integer check.
+  assert.throws(() => runCheckSettings(settingsCfg({ maxAlertsPerRun: true })), /maxAlertsPerRun/);
+});
+
+test('AC4: rejects maxAlertsPerRun given as an array', () => {
+  if (!built()) return;
+  // Number([5]) is 5 via Array#toString, which previously slipped past the check.
+  assert.throws(() => runCheckSettings(settingsCfg({ maxAlertsPerRun: [5] })), /maxAlertsPerRun/);
+});
+
+test('AC6: emoji alt attribute is captured when it comes before class', () => {
+  if (!built()) return;
+  const a = alertFor({ text: '<i alt="🎉" class="emoji"></i> celebrate time', keywords: ['celebrate'] });
+  assert.ok(a, 'post should alert');
+  assert.ok(a.snippet.includes('🎉'), 'emoji alt text kept when alt precedes class: ' + JSON.stringify(a.snippet));
+  assert.ok(!a.snippet.includes('<'), 'no leftover tag markup');
 });
