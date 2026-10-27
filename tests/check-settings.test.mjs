@@ -61,7 +61,7 @@ test('AC4: normalises every accepted channel format', () => {
       channels: [
         'durov',
         '@telegram',
-        't.me/n8n',
+        't.me/n8nteam',
         'https://t.me/durov_test',
         'https://t.me/s/some_channel',
         'https://t.me/durov/531?embed=1',
@@ -70,7 +70,7 @@ test('AC4: normalises every accepted channel format', () => {
     }),
   );
   const slugs = items.map((i) => i.json.channel);
-  assert.deepEqual(slugs, ['durov', 'telegram', 'n8n', 'durov_test', 'some_channel', 'trailing']);
+  assert.deepEqual(slugs, ['durov', 'telegram', 'n8nteam', 'durov_test', 'some_channel', 'trailing']);
   // /531 post suffix and ?query stripped, duplicate durov removed.
 });
 
