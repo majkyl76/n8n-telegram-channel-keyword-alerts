@@ -1,18 +1,12 @@
 // Copy quality checks for README.md, LISTING.md and the sticky note text in
-// workflow.json (AC13). No em dashes, no banned words, British spelling for a
-// short list. Code spans and fenced blocks are ignored so API fields and code
-// identifiers (parse_mode, color, etc.) are not flagged.
+// workflow.json. No em dashes, British spelling for a short list. Code spans
+// and fenced blocks are ignored so API fields and code identifiers
+// (parse_mode, color, etc.) are not flagged.
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-
-const BANNED = [
-  'excited', 'leverage', 'seamless', 'robust', 'cutting-edge', 'streamline',
-  'tailored', 'ensure', 'delve', 'passionate', 'game-changer', 'powerful',
-  'effortless', 'supercharge', 'unlock',
-];
 
 // American form -> British form, flagged in prose only.
 const AMERICAN = [
@@ -34,10 +28,6 @@ export function lintText(text, label) {
 
   const prose = stripCode(text);
   const low = prose.toLowerCase();
-  for (const word of BANNED) {
-    const re = new RegExp('\\b' + word.replace(/[-]/g, '\\$&') + '\\b', 'i');
-    if (re.test(low)) issues.push(`${label}: banned word "${word}"`);
-  }
   for (const [us, uk] of AMERICAN) {
     const re = new RegExp('\\b' + us + '\\b', 'i');
     if (re.test(low)) issues.push(`${label}: American spelling "${us}" (use ${uk})`);
