@@ -131,6 +131,7 @@ const nodes = [
     typeVersion: 1.1,
     position: [1260, 110],
     parameters: { fieldToSplitOut: 'posts', options: {} },
+    onError: 'continueRegularOutput',
   },
   {
     id: 'node-extract',
@@ -153,6 +154,7 @@ const nodes = [
       },
       options: {},
     },
+    onError: 'continueRegularOutput',
   },
   {
     id: 'node-find',
