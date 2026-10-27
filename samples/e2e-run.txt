@@ -1,0 +1,30 @@
+imported workflow I4o5GApnW895C2qC with 16 nodes
+activated, schedule every 6s
+-- phase baseline: execution 69 status=success, messages sent=2, preview fetches=alpha,ghost,boomer
+PASS baseline: execution succeeded
+PASS baseline: all three channels fetched with a browser User-Agent
+PASS baseline: no keyword alerts, only the two channel-problem notices
+   first parsed item: {"postId":"alpha/533","text":"<tg-emoji emoji-id=\"5460865451586250451\"><i class=\"emoji\" style=\"background-image:url('//telegram.org/img/emoji/40/F09FA9B5.png')\"><b>🩵</b></i></tg-emoji> Telegram now has a <b>Rich Text Editor</b>.<br><br>It supports tables, headings, inline media, lists, AI content, formulas, and more.<br><br><tg-emoji emoji-id=\"5357135183864667855\"><i class=\"emoji\" style=\"background-image:url('//telegram.org/img/emoji/40/F09F9888.png')\"><b>😈</b></i></tg-emoji> Messaging apps will never be the same!","isoDate":"2026-07-16T20:45:25+00:00","url":"https://t.me/alpha/533","views":"5.85M"}
+PASS baseline: real HTML nodes parsed the real fixture (20 posts) into the Code node
+-- phase newposts: execution 71 status=success, messages sent=2, preview fetches=alpha,ghost,boomer
+   full alert 1: {"chat_id":"424242","text":"<b>@alpha</b>\n2026-10-11 14:52 UTC\n\nKubernetes 1.40 is out, release notes here\n\nMatched: kubernetes\n<a href=\"https://t.me/alpha/553\">Open post</a>","disable_web_page_preview":true,"parse_mode":"HTML"}
+PASS newposts: exactly two keyword alerts (553 and 556), in order
+PASS newposts: excluded (557), irrelevant (555) and media-only (554) posts are silent
+   sample message:
+     | <b>@alpha</b>
+     | 2026-10-11 14:52 UTC
+     | 
+     | Remote ŻÓŁĆ job: x &amp; y &lt;3 second line
+     | 
+     | Matched: remote, żółć
+     | <a href="https://t.me/alpha/556">Open post</a>
+PASS newposts: message format (HTML parse mode, escaping, matched keywords, link)
+-- phase nochange: execution 73 status=success, messages sent=0, preview fetches=alpha,ghost,boomer
+PASS nochange: zero messages (dedupe and one-off notices hold across runs)
+-- phase cap: execution 75 status=success, messages sent=11, preview fetches=alpha,ghost,boomer
+PASS cap: 10 individual alerts (newest) plus one summary "+2 more"
+PASS gap: alerts carry the possible-gap note
+-- phase cap: execution 76 status=success, messages sent=0, preview fetches=alpha,ghost,boomer
+PASS cap: next run repeats nothing
+
+e2e summary: 11/11 passed
