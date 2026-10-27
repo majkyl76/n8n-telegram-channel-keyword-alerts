@@ -1,0 +1,29 @@
+# Fresh-session review 1 (raw output)
+
+Reviewer saw only SPEC.md, package.json, src, tests, scripts, fixtures and workflow.json (no README, LISTING, NOTES, CLAUDE.md or PR.md). Cost USD 0.83.
+
+All probes complete. Here is my final report.
+
+## Findings
+
+| ID | Severity | What is wrong | Command & output that proves it | Suggested fix |
+|----|----------|---------------|---------------------------------|---------------|
+| F1 | **major** | Required deliverables `README.md` and `LISTING.md` do not exist, so the shipped AC13 test fails and `npm run lint:copy` errors. AC12 (honest-limits in README/LISTING) and the AC3/AC6 "record in NOTES.md" requirement are therefore unmet — `NOTES.md` is also absent. | `node --test` → `✖ AC13: README, LISTING and sticky text pass copy lint … AssertionError: README.md must exist`. `node scripts/lint-copy.mjs` → `Exit code 1 / Copy lint found issues: - README.md: missing - LISTING.md: missing`. `ls README.md LISTING.md NOTES.md` → all `No such file or directory`. | Write `README.md` (<600 words), `LISTING.md` (marketplace style) and `NOTES.md` (credential-id choice + fixture-derivation method) per the spec; re-run `npm run lint:copy`. |
+| F2 | **minor** | AC11 says total message length is "always under 4096 … even for hostile input", but only the snippet is shrunk in `buildAlertText`. A long `post.url` (or a very long `Matched:` list) is escaped and inserted without any cap, so the message can exceed 4096. Note: in the real pipeline `url` comes from the Telegram preview `href` / a validated channel+numeric id, so it is Telegram/config-bounded, not externally attacker-controlled — hence minor. | `node scratch/probe.mjs` → `P1 long-url message length = 6105 under4096= false` and `P2 many-matched length = 14981 under4096= false` (P3 snippet-driven case correctly stays `2092 under4096= true`). | In `buildAlertText`, hard-truncate `post.url` and the `matched.join(', ')` line to a budget, or include the whole message in the shrink loop and fall back to dropping the link/matched list if still over 4096. |
+
+### Not bugs (verified, to pre-empt false positives)
+- **`dataPropertyName:"data"` on the first HTML node is correct.** I suspected a mismatch with the HTTP node's `fullResponse`. Verified in the installed source (`scratch/read-http3.mjs`, `read-http2.mjs`): a `text/html` response under autodetect takes `responseFormat='text'`, and the `text`+`fullResponse` branch writes the body to `returnItem[outputPropertyName]` with `outputPropertyName` defaulting to `'data'` (line 759/764). So the HTML lands in `data`. No bug.
+- **Telegram node params valid.** `parse_mode`, `disable_web_page_preview`, `appendAttribution` all exist and `sendMessage` applies them via `addAdditionalFields` (`scratch/read-telegram*.mjs`).
+- **Core logic is not vacuous and is correct** for AC4/AC7/AC8/AC9/AC10:
+  - `scratch/scenario.mjs` → AC8 `run1 alerts=1 run2 alerts=0 state={"lastSeen_durov":11}`; AC9 cap `alerts ids=[3,4,5] summary=["+2 more…"]`; AC9 gap `possibleGap=true noteInText=true`; AC10 `notice1=1 notice2=0 state={"problem_durov":true}`.
+  - `scratch/check.mjs` → dedup across `@durov/durov/t.me/…/DUROV`→`["durov"]`; comments/blank lines ignored; invalid/short/digit-start channels, `maxAlertsPerRun` of `2.5`/`0`, empty chat id and empty keywords all throw clear messages; `maxAlertsPerRun:'10'` accepted.
+  - `scratch/match.mjs` → `ai`∈`AI tools`/`(AI)` but not `mail`/`Kuwait`; `c++`,`.net`,`$BTC` literal; `żółć`≈`ŻÓŁĆ`; phrase across blank lines; exclude veto → `null`; `AT&amp;T`→matches `AT&T`; emoji `<i class="emoji"><b>🚀</b></i>`→`"🚀 go"`; tags stripped with no leftover `<`/`>`; numeric entities `€😀`.
+
+## Spec gaps / unproven suspicions
+- **AC10 "request error … one notice" and "one bad channel never stops the others" — UNPROVEN risk.** For a genuine connection error (not a non-2xx; `neverError` only suppresses HTTP status errors), the HTTP node with `onError:continueRegularOutput` passes the original input item (no `data`) downstream. The first HTML node then throws `No property named "data" exists!` and, under its `continueRegularOutput`, forwards an item with no `posts`; the **`Split out each post` node has no `onError` set**, and if it throws on the missing `posts` field it could abort the execution and starve other channels. I did not run live n8n (no `N8N_URL`), so this is unproven — but it is the one wiring path the unit tests never exercise (they feed `fixtures/durov.items.json` straight into the Code node) and AC14/e2e was not run. Recommend setting `onError:continueRegularOutput` (or `alwaysOutputData`) on `Split out each post`, or validating `$json.data` existence before the HTML node.
+- **AC9 note surfacing.** `possibleGap` is attached only to `alert` items; if a gap exists in a run with zero keyword matches, nothing carries `possibleGap:true` for that channel. The spec ties the note to the alert message, so this is within spec, but the "run output for that channel carries possibleGap: true" clause is not satisfied when there is no alert/baseline item.
+- **AC3 credential id.** The Telegram credential is referenced by `name` only with no `id`. Whether n8n import accepts a name-only credential ref is **UNPROVEN** (no live n8n); the spec's required justification in `NOTES.md` is absent (see F1).
+- **AC14 e2e not executed** (no `N8N_URL`), per the spec's own instruction. The real HTML-node selectors and the HTTP→HTML→SplitOut wiring are therefore unverified end-to-end; unit tests bypass them.
+
+## Verdict
+**FAIL** — F1 is a concrete, reproducible failure of a shipped acceptance test (AC13) and leaves required AC12/AC3/AC6 deliverables (README.md, LISTING.md, NOTES.md) missing. The core Code-node logic is correct and well-tested, but the template is not shippable until the documentation deliverables exist and the AC13 lint passes.
