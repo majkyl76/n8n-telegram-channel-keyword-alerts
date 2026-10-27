@@ -1,25 +1,32 @@
 // Produce sample outputs from the unit-test harness and the golden fixture, so
 // readers can see what the workflow emits without running n8n. Offline only.
+// Everything is produced by driving the shipped Code node through its input and
+// output (no test hook), the same way the unit tests do.
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  root, findHelpers, fixture, runGolden, GOLDEN_CONFIG,
+  root, fixture, runFindNew, channelConfig, runGolden, GOLDEN_CONFIG,
 } from '../tests/helpers.mjs';
 
-const h = findHelpers();
-
-// 1. Parsed posts: the candidate objects the Code node builds from the HTML items.
-const parsed = fixture('durov.items.json').map((i) => {
-  const p = h.parsePost(i);
-  return {
-    channel: p.channel,
-    postId: p.postId,
-    url: p.url,
-    isoDate: p.isoDate,
-    views: p.views,
-    text: p.text,
-  };
-});
+// 1. Parsed posts: run the durov fixture with no cap and no baseline so every
+//    keyword match surfaces as an alert carrying the parsed fields. (Media-only
+//    posts have no text and no keyword match, so they do not appear here.)
+const parsedOut = runFindNew({
+  inputItems: fixture('durov.items.json'),
+  channelItems: [channelConfig('durov', { keywords: GOLDEN_CONFIG.keywords, baselineOnFirstRun: false, maxAlertsPerRun: 100 })],
+  staticData: {},
+}).out.map((i) => i.json);
+const parsed = parsedOut
+  .filter((j) => j.kind === 'alert')
+  .map((j) => ({
+    channel: j.channel,
+    postId: j.postId,
+    url: j.url,
+    isoDate: j.isoDate,
+    views: j.views,
+    matched: j.matchedKeywords,
+    snippet: j.snippet,
+  }));
 writeFileSync(join(root, 'samples', 'parsed-posts.json'), JSON.stringify(parsed, null, 2) + '\n');
 
 // 2. Golden alert output (also the golden-test fixture).
