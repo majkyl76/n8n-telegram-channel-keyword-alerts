@@ -62,7 +62,9 @@ function htmlToText(html) {
 // --- keyword matching -------------------------------------------------------
 function escapeRegex(s) {
   // Escape every regex metacharacter so keywords match literally (c++, .net, $BTC).
-  return s.replace(/[.*+?^${}()|[\]\\\/-]/g, '\\$&');
+  // Hyphen is deliberately excluded: outside a character class it has no special
+  // meaning, and escaping it (\-) is an invalid escape under the /u flag.
+  return s.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&');
 }
 
 function keywordRegex(keyword, wholeWords) {
@@ -113,12 +115,21 @@ function formatUtc(iso) {
   );
 }
 
+// A high surrogate at the very end of a cut string has had its low-surrogate
+// partner sliced off, leaving an unpaired code unit. Back off one more
+// character so the cut never lands inside a surrogate pair.
+function dropTrailingHighSurrogate(s) {
+  const code = s.charCodeAt(s.length - 1);
+  return code >= 0xd800 && code <= 0xdbff ? s.slice(0, -1) : s;
+}
+
 function cutSnippet(text, max) {
   const t = String(text).replace(/\s+/g, ' ').trim();
   if (t.length <= max) return t;
-  let slice = t.slice(0, max - 1); // leave room for the ellipsis
+  let slice = dropTrailingHighSurrogate(t.slice(0, max - 1)); // leave room for the ellipsis
   const lastSpace = slice.lastIndexOf(' ');
   if (lastSpace > 0) slice = slice.slice(0, lastSpace); // cut at a word boundary
+  slice = dropTrailingHighSurrogate(slice);
   return slice.replace(/\s+$/, '') + '…';
 }
 
@@ -129,7 +140,7 @@ const GAP_NOTE =
 // after escaping bounds the output even if escaping expanded the input (e.g. a
 // run of & < >); it may clip inside an entity but never inside a tag.
 function clip(s, max) {
-  return s.length <= max ? s : s.slice(0, max) + '…';
+  return s.length <= max ? s : dropTrailingHighSurrogate(s.slice(0, max)) + '…';
 }
 const HEADER_MAX = 100; // characters of channel name shown in the header
 const MATCHED_MAX = 300; // characters of the "Matched: ..." list
@@ -246,8 +257,17 @@ function main() {
 
     const highest = group[group.length - 1].postId;
     const lowest = group[0].postId;
-    const hasState = Object.prototype.hasOwnProperty.call(staticData, lastKey);
-    const lastSeen = hasState ? staticData[lastKey] : null;
+    let hasState = Object.prototype.hasOwnProperty.call(staticData, lastKey);
+    let lastSeen = null;
+    if (hasState) {
+      // AC9: coerce whatever is in static data to a number right away. A string
+      // like "5" (hand-edited state) must behave as 5, not take part in "5" + 1
+      // string concatenation; anything that is not a finite number (NaN, object,
+      // array) is treated the same as a missing value, i.e. no state.
+      const n = Number(staticData[lastKey]);
+      if (Number.isFinite(n)) lastSeen = n;
+      else hasState = false;
+    }
 
     // AC9: a jump at the bottom of the page means posts may have scrolled off.
     const possibleGap = hasState && lastSeen != null && lowest > lastSeen + 1;
