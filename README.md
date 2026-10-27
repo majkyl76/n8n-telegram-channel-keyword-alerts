@@ -3,6 +3,10 @@
 An n8n workflow template that watches public Telegram channels and pings you on
 Telegram the moment a post matches your keywords.
 
+## Overview
+
+![Workflow canvas showing the trigger, settings, fetch, parse, match and alert nodes](screenshots/canvas.png)
+
 ## The problem it solves
 
 Following several Telegram channels for one or two topics means either muting
@@ -52,7 +56,7 @@ active workflow.
 
 ### Requirements
 
-- n8n, self-hosted or cloud.
+- Tested on n8n 2.44.7, self-hosted or cloud.
 - A Telegram bot: create one with @BotFather and copy its token.
 - Your chat id: message your bot, then open
   `https://api.telegram.org/bot<token>/getUpdates` and read `chat.id`. For a
@@ -134,12 +138,16 @@ keywords** node:
   dedupe state, gap detection, caps and summaries, message formatting and
   length limits, workflow structure (no orphan nodes, every node reachable,
   sticky note layout), and a golden fixture run end to end through the
-  shipped Code nodes.
+  shipped Code nodes. 85 run and pass offline; the remaining one (the
+  node-version check below) is skipped unless `N8N_NODES_BASE` is set.
 - `npm run lint:copy` checks README.md, LISTING.md and the sticky note text in
-  `workflow.json` for banned marketing words, em dashes and American
-  spellings.
+  `workflow.json` for em dashes and American spellings.
 - `npm run build` regenerates `workflow.json` from the Code node sources in
   `src/`; a test fails if the committed file is stale.
+- The node-version check (every node type and typeVersion exists in the
+  installed n8n) needs a local n8n install; set `N8N_NODES_BASE` to its
+  `n8n-nodes-base/dist/nodes` directory to run it, otherwise it is reported
+  as skipped.
 - An optional live end-to-end check exists in `scripts/e2e.mjs`, run against a
   local n8n instance with `N8N_URL` and `N8N_API_KEY` set. It imports the
   workflow unchanged through the n8n API, points it at two local mock
