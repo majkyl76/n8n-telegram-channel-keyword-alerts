@@ -57,16 +57,22 @@ test('AC7 property: a whole word always matches, an embedded one never does', ()
   if (!built()) return;
   const rand = rng(SEED + 1);
   const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
-  const word = () => {
+  // Keywords are also fuzzed over every character escapeRegex touches (review F1:
+  // a hyphen used to crash the regex compile). before/after stay plain letters, so
+  // gluing them straight onto the keyword always lands on a real word character and
+  // the "embedded must not match" assertion below stays meaningful regardless of
+  // what the keyword itself is made of.
+  const kwAlphabet = letters.concat(['-', '.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\', '/']);
+  const word = (alphabet) => {
     let w = '';
     const n = 3 + Math.floor(rand() * 6);
-    for (let i = 0; i < n; i++) w += letters[Math.floor(rand() * letters.length)];
+    for (let i = 0; i < n; i++) w += alphabet[Math.floor(rand() * alphabet.length)];
     return w;
   };
   for (let i = 0; i < 200; i++) {
-    const kw = word();
-    const before = word();
-    const after = word();
+    const kw = word(kwAlphabet);
+    const before = word(letters);
+    const after = word(letters);
     // whole word, surrounded by spaces: must match (one alert with the keyword).
     const good = alertFor({ text: `${before} ${kw} ${after}`, keywords: [kw] });
     assert.ok(good, 'whole word should match: ' + kw);

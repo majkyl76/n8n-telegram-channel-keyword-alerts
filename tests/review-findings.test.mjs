@@ -149,3 +149,111 @@ test('AC6: emoji alt attribute is captured when it comes before class', () => {
   assert.ok(a.snippet.includes('🎉'), 'emoji alt text kept when alt precedes class: ' + JSON.stringify(a.snippet));
   assert.ok(!a.snippet.includes('<'), 'no leftover tag markup');
 });
+
+// --- Final independent review: F1 (blocker), F2, F3 regressions ------------
+
+function hasLoneSurrogate(s) {
+  for (let i = 0; i < s.length; i++) {
+    const code = s.charCodeAt(i);
+    if (code >= 0xd800 && code <= 0xdbff) {
+      const next = s.charCodeAt(i + 1);
+      if (!(next >= 0xdc00 && next <= 0xdfff)) return true;
+    } else if (code >= 0xdc00 && code <= 0xdfff) {
+      const prev = i > 0 ? s.charCodeAt(i - 1) : 0;
+      if (!(prev >= 0xd800 && prev <= 0xdbff)) return true;
+    }
+  }
+  return false;
+}
+
+test('AC7: a keyword containing a hyphen matches literally without throwing (work-from-home)', () => {
+  if (!built()) return;
+  const a = alertFor({ text: 'Remote work-from-home roles added today', keywords: ['work-from-home'] });
+  assert.ok(a, 'hyphenated keyword should match');
+  assert.deepEqual(a.matchedKeywords, ['work-from-home']);
+});
+
+test('AC7: a hyphenated exclude keyword vetoes a match without throwing (work-from-home)', () => {
+  if (!built()) return;
+  const out = runOne({
+    text: 'Remote work-from-home roles added today',
+    keywords: ['roles'],
+    excludeKeywords: ['work-from-home'],
+  }).filter((j) => j.kind === 'alert');
+  assert.equal(out.length, 0, 'excluded post must not alert');
+});
+
+test('AC7: hyphenated keywords match literally with matchWholeWords on (T-Mobile, COVID-19, a-b)', () => {
+  if (!built()) return;
+  for (const kw of ['T-Mobile', 'COVID-19', 'a-b']) {
+    const good = alertFor({ text: `see ${kw} here`, keywords: [kw], matchWholeWords: true });
+    assert.ok(good, kw + ' should match as a whole word');
+    const embedded = runOne({ text: `prefix${kw}suffix`, keywords: [kw], matchWholeWords: true }).filter(
+      (j) => j.kind === 'alert'
+    );
+    assert.equal(embedded.length, 0, kw + ' embedded in other characters must not match with whole words on');
+  }
+});
+
+test('AC7: hyphenated keywords match as a substring with matchWholeWords off (T-Mobile, COVID-19, a-b)', () => {
+  if (!built()) return;
+  for (const kw of ['T-Mobile', 'COVID-19', 'a-b']) {
+    const a = alertFor({ text: `prefix${kw}suffix`, keywords: [kw], matchWholeWords: false });
+    assert.ok(a, kw + ' should match as a substring with whole words off');
+  }
+});
+
+test('AC7: hyphenated exclude keywords veto with matchWholeWords on and off (T-Mobile, COVID-19, a-b)', () => {
+  if (!built()) return;
+  for (const kw of ['T-Mobile', 'COVID-19', 'a-b']) {
+    const vetoedWhole = runOne({
+      text: `see ${kw} here`,
+      keywords: ['see'],
+      excludeKeywords: [kw],
+      matchWholeWords: true,
+    }).filter((j) => j.kind === 'alert');
+    assert.equal(vetoedWhole.length, 0, kw + ' exclude keyword should veto with whole words on');
+    const vetoedSub = runOne({
+      text: `prefix${kw}suffix`,
+      keywords: ['prefix'],
+      excludeKeywords: [kw],
+      matchWholeWords: false,
+    }).filter((j) => j.kind === 'alert');
+    assert.equal(vetoedSub.length, 0, kw + ' exclude keyword should veto as a substring with whole words off');
+  }
+});
+
+test('AC11: cutSnippet never leaves a lone surrogate at the cut (498 chars + emoji + 50 chars)', () => {
+  if (!built()) return;
+  const text = 'x'.repeat(498) + '😀' + 'y'.repeat(50) + ' propertymatch';
+  const a = alertFor({ text, keywords: ['propertymatch'] });
+  assert.ok(a, 'post should alert');
+  assert.ok(!hasLoneSurrogate(a.snippet), 'snippet must not contain a lone surrogate: ' + JSON.stringify(a.snippet));
+  assert.ok(!hasLoneSurrogate(a.text), 'full alert text must not contain a lone surrogate');
+});
+
+test('AC15: clip never leaves a lone surrogate in the matched-keyword list (299 chars + emoji)', () => {
+  if (!built()) return;
+  const keyword = 'a'.repeat(299) + '🚀';
+  const a = alertFor({ text: keyword + ' more text', keywords: [keyword] });
+  assert.ok(a, 'post should alert');
+  assert.ok(!hasLoneSurrogate(a.text), 'alert text must not contain a lone surrogate at the matched-list cut');
+});
+
+test('AC9: a string lastSeen is coerced to a number so a real gap is still flagged', () => {
+  if (!built()) return;
+  const out = runFindNew({
+    inputItems: [
+      { postId: 'durov/10', text: 'match here', isoDate: '2026-07-16T20:45:25+00:00', url: 'https://t.me/durov/10', views: '1K' },
+    ],
+    channelItems: [channelConfig('durov', { keywords: ['match'], baselineOnFirstRun: false })],
+    staticData: { lastSeen_durov: '5' },
+  }).out.map((i) => i.json);
+  const alert = out.find((j) => j.kind === 'alert');
+  assert.ok(alert, 'post 10 should alert, as it is greater than the stored lastSeen of 5');
+  assert.equal(
+    alert.possibleGap,
+    true,
+    'gap between stored lastSeen 5 and lowest new post 10 (posts 6-9 missing) must be flagged even though lastSeen was stored as a string'
+  );
+});
