@@ -18,19 +18,19 @@ const matched = (text, keywords, opts = {}) => {
   return a ? a.matchedKeywords : null;
 };
 
-test('AC7: matching is case-insensitive', () => {
+test('matching is case-insensitive', () => {
   if (!built()) return;
   assert.deepEqual(matched('We love N8N here', ['n8n']), ['n8n']);
   assert.deepEqual(matched('KUBERNETES rocks', ['kubernetes']), ['kubernetes']);
 });
 
-test('AC7: matching is Unicode-aware (Polish)', () => {
+test('matching is Unicode-aware (Polish)', () => {
   if (!built()) return;
   assert.deepEqual(matched('test ŻÓŁĆ test', ['żółć']), ['żółć']);
   assert.deepEqual(matched('żółć', ['ŻÓŁĆ']), ['ŻÓŁĆ']);
 });
 
-test('AC7: whole-word matching with matchWholeWords true', () => {
+test('whole-word matching with matchWholeWords true', () => {
   if (!built()) return;
   assert.deepEqual(matched('AI tools are here', ['ai']), ['ai']);
   assert.deepEqual(matched('look (AI) now', ['ai']), ['ai']);
@@ -38,20 +38,20 @@ test('AC7: whole-word matching with matchWholeWords true', () => {
   assert.equal(matched('visited Kuwait', ['ai']), null);
 });
 
-test('AC7: substring matching with matchWholeWords false', () => {
+test('substring matching with matchWholeWords false', () => {
   if (!built()) return;
   assert.deepEqual(matched('send me mail', ['ai'], { whole: false }), ['ai']);
   assert.deepEqual(matched('Kuwait', ['ai'], { whole: false }), ['ai']);
 });
 
-test('AC7: multi-word phrases match across any whitespace run', () => {
+test('multi-word phrases match across any whitespace run', () => {
   if (!built()) return;
   assert.deepEqual(matched('a fully remote job today', ['remote job']), ['remote job']);
   assert.deepEqual(matched('a remote\n   job', ['remote job']), ['remote job']);
   assert.equal(matched('remotejob', ['remote job']), null);
 });
 
-test('AC7: regex special characters are treated literally', () => {
+test('regex special characters are treated literally', () => {
   if (!built()) return;
   assert.deepEqual(matched('I code in c++ daily', ['c++']), ['c++']);
   assert.deepEqual(matched('using .net core', ['.net']), ['.net']);
@@ -59,7 +59,7 @@ test('AC7: regex special characters are treated literally', () => {
   assert.equal(matched('cxx not cpp', ['c++']), null);
 });
 
-test('AC7: exclude keywords veto a post', () => {
+test('exclude keywords veto a post', () => {
   if (!built()) return;
   // Vetoed: no alert at all.
   assert.equal(matched('remote job, no crypto', ['remote'], { exclude: ['crypto'] }), null);
@@ -67,7 +67,7 @@ test('AC7: exclude keywords veto a post', () => {
   assert.deepEqual(matched('remote job', ['remote'], { exclude: ['crypto'] }), ['remote']);
 });
 
-test('AC7: matched keywords are returned de-duplicated in config order', () => {
+test('matched keywords are returned de-duplicated in config order', () => {
   if (!built()) return;
   const text = 'remote kubernetes remote n8n';
   assert.deepEqual(matched(text, ['n8n', 'kubernetes', 'remote', 'n8n']), ['n8n', 'kubernetes', 'remote']);

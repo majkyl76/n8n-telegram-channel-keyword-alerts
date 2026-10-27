@@ -20,7 +20,7 @@ function post(channel, id, text) {
 }
 const alerts = (out) => out.filter((i) => i.json.kind === 'alert');
 
-test('AC8: running twice on the same page alerts once', () => {
+test('running twice on the same page alerts once', () => {
   if (!built()) return;
   const channelItems = [channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: false })];
   const inputItems = [post('examplechannel', 1, 'telegram one'), post('examplechannel', 2, 'telegram two')];
@@ -31,7 +31,7 @@ test('AC8: running twice on the same page alerts once', () => {
   assert.equal(alerts(second.out).length, 0, 'no re-alert on the second run');
 });
 
-test('AC8: lastSeenPostId advances to the highest id even with no match', () => {
+test('lastSeenPostId advances to the highest id even with no match', () => {
   if (!built()) return;
   const channelItems = [channelConfig('examplechannel', { keywords: ['nothingmatcheshere'], baselineOnFirstRun: false })];
   const inputItems = [post('examplechannel', 10, 'a'), post('examplechannel', 42, 'b'), post('examplechannel', 7, 'c')];
@@ -41,7 +41,7 @@ test('AC8: lastSeenPostId advances to the highest id even with no match', () => 
   assert.equal(state.lastSeen_examplechannel, 42);
 });
 
-test('AC8: posts at or below lastSeenPostId never alert', () => {
+test('posts at or below lastSeenPostId never alert', () => {
   if (!built()) return;
   const channelItems = [channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: false })];
   const state = { lastSeen_examplechannel: 2 };
@@ -51,7 +51,7 @@ test('AC8: posts at or below lastSeenPostId never alert', () => {
   assert.deepEqual(ids, [3]);
 });
 
-test('AC8: baselineOnFirstRun true records the highest id and sends no alerts', () => {
+test('baselineOnFirstRun true records the highest id and sends no alerts', () => {
   if (!built()) return;
   const channelItems = [channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: true })];
   const inputItems = [post('examplechannel', 5, 'telegram'), post('examplechannel', 9, 'telegram')];
@@ -64,7 +64,7 @@ test('AC8: baselineOnFirstRun true records the highest id and sends no alerts', 
   assert.equal(baseline.json.send, false, 'baseline is not sent to Telegram');
 });
 
-test('AC8: baselineOnFirstRun false alerts on first-run matches', () => {
+test('baselineOnFirstRun false alerts on first-run matches', () => {
   if (!built()) return;
   const channelItems = [channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: false })];
   const inputItems = [post('examplechannel', 5, 'telegram'), post('examplechannel', 9, 'no match'), post('examplechannel', 11, 'telegram')];
@@ -72,7 +72,7 @@ test('AC8: baselineOnFirstRun false alerts on first-run matches', () => {
   assert.deepEqual(alerts(r.out).map((i) => i.json.postId), [5, 11]);
 });
 
-test('AC8: channels are independent and same post numbers never collide', () => {
+test('channels are independent and same post numbers never collide', () => {
   if (!built()) return;
   const channelItems = [
     channelConfig('aaa', { keywords: ['hit'], baselineOnFirstRun: false }),

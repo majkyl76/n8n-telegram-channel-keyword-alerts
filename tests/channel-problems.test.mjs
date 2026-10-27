@@ -18,7 +18,7 @@ function post(channel, id, text) {
 }
 const notices = (out) => out.filter((i) => i.json.kind === 'notice');
 
-test('AC10: a channel with no posts produces one notice, then stays quiet', () => {
+test('a channel with no posts produces one notice, then stays quiet', () => {
   if (!built()) return;
   const channelItems = [channelConfig('ghost', { keywords: ['telegram'] })];
   const state = {};
@@ -33,7 +33,7 @@ test('AC10: a channel with no posts produces one notice, then stays quiet', () =
   assert.equal(notices(second.out).length, 0, 'no repeat notice while still broken');
 });
 
-test('AC10: recovery sends no message and clears the flag', () => {
+test('recovery sends no message and clears the flag', () => {
   if (!built()) return;
   const channelItems = [channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: false })];
   const state = { problem_examplechannel: true };
@@ -42,7 +42,7 @@ test('AC10: recovery sends no message and clears the flag', () => {
   assert.ok(!('problem_examplechannel' in state), 'problem flag cleared');
 });
 
-test('AC10: none.html (zero post blocks) is treated as a channel problem', () => {
+test('none.html (zero post blocks) is treated as a channel problem', () => {
   if (!built()) return;
   const items = fixture('none.items.json');
   assert.equal(items.length, 0, 'none.html yields no post blocks');
@@ -51,7 +51,7 @@ test('AC10: none.html (zero post blocks) is treated as a channel problem', () =>
   assert.equal(notices(r.out).length, 1);
 });
 
-test('AC10: one bad channel does not stop the others', () => {
+test('one bad channel does not stop the others', () => {
   if (!built()) return;
   const channelItems = [
     channelConfig('ghost', { keywords: ['telegram'], baselineOnFirstRun: false }),

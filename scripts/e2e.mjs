@@ -1,4 +1,4 @@
-// Live end-to-end check (AC14), run against a LOCAL n8n only.
+// Live end-to-end check, run against a LOCAL n8n only.
 //
 //   N8N_URL=http://127.0.0.1:5678 N8N_API_KEY=... node scripts/e2e.mjs
 //

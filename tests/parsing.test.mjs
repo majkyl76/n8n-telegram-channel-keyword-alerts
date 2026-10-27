@@ -15,7 +15,7 @@ function built() {
 // The plain-text conversion is observed through the unescaped `snippet` field.
 const snippetOf = (text, keywords = ['match']) => alertFor({ text, keywords }).snippet;
 
-test('AC6: one candidate per post block with the expected fields', () => {
+test('one candidate per post block with the expected fields', () => {
   if (!built()) return;
   const items = fixture('examplechannel.items.json');
   assert.equal(items.length, 20, 'fixture has 20 post blocks');
@@ -48,7 +48,7 @@ test('AC6: one candidate per post block with the expected fields', () => {
   assert.match(baseline.text, /Recorded the latest of 20 posts/);
 });
 
-test('AC6: <br> becomes a separator and tags are stripped', () => {
+test('<br> becomes a separator and tags are stripped', () => {
   if (!built()) return;
   // The snippet collapses whitespace to single spaces, so a <br> newline shows as
   // a space: words are separated (not glued) and no tag markup survives.
@@ -58,7 +58,7 @@ test('AC6: <br> becomes a separator and tags are stripped', () => {
   assert.ok(!snip.includes('>'), 'no leftover >');
 });
 
-test('AC6: entities are decoded (named and numeric)', () => {
+test('entities are decoded (named and numeric)', () => {
   if (!built()) return;
   assert.equal(snippetOf('A &amp; B match'), 'A & B match');
   assert.equal(snippetOf('&lt;tag&gt; match'), '<tag> match');
@@ -67,7 +67,7 @@ test('AC6: entities are decoded (named and numeric)', () => {
   assert.equal(snippetOf('bang&#33; smile&#x1F600; match'), 'bang! smile\u{1F600} match');
 });
 
-test('AC6: emoji inner text is kept and whitespace is collapsed', () => {
+test('emoji inner text is kept and whitespace is collapsed', () => {
   if (!built()) return;
   const emoji = '<tg-emoji emoji-id="1"><i class="emoji" style="x"><b>🩵</b></i></tg-emoji> Hello   world match';
   assert.equal(snippetOf(emoji), '🩵 Hello world match');
@@ -75,7 +75,7 @@ test('AC6: emoji inner text is kept and whitespace is collapsed', () => {
   assert.equal(snippetOf('<i class="emoji" alt="😀"></i> hi match'), '😀 hi match');
 });
 
-test('AC6: a fixture post decodes to clean plain text', () => {
+test('a fixture post decodes to clean plain text', () => {
   if (!built()) return;
   const items = fixture('examplechannel.items.json');
   const p538 = items.find((i) => i.postId === 'examplechannel/538');
@@ -93,7 +93,7 @@ test('AC6: a fixture post decodes to clean plain text', () => {
   assert.ok(a.snippet.includes('moderation tools')); // link text survives
 });
 
-test('AC6: a forwarded post parses as one candidate with clean text, no forward label', () => {
+test('a forwarded post parses as one candidate with clean text, no forward label', () => {
   if (!built()) return;
   const items = fixture('examplechannel.items.json');
   const forwarded = items.find((i) => i.postId === 'examplechannel/536');

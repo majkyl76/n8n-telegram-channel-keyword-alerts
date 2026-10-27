@@ -147,7 +147,7 @@ const MATCHED_MAX = 300; // characters of the "Matched: ..." list
 const URL_MAX = 600; // characters of the link target
 
 function buildAlertText(channel, post, matched, possibleGap) {
-  // AC15: cap the header, matched list and link so the message stays under the
+  // Cap the header, matched list and link so the message stays under the
   // Telegram limit even for a very long channel name, link or keyword list.
   const header = '<b>@' + clip(escapeHtml(channel), HEADER_MAX) + '</b>';
   const date = formatUtc(post.isoDate);
@@ -195,7 +195,7 @@ function parsePost(raw) {
   const slash = dataPost.lastIndexOf('/');
   const channel = slash >= 0 ? dataPost.slice(0, slash) : '';
   const postId = parseInt(dataPost.slice(slash + 1), 10);
-  // AC16: build the permalink from the validated channel and numeric id, never
+  // Build the permalink from the validated channel and numeric id, never
   // from the page href (which is attacker-controllable). raw.url is ignored.
   const url = channel && Number.isFinite(postId) ? 'https://t.me/' + channel + '/' + postId : '';
   return {
@@ -221,7 +221,7 @@ function main() {
   const baselineOnFirstRun = cfg.baselineOnFirstRun !== false;
   const chatId = cfg.chatId;
 
-  // Group the parsed posts by channel, de-duplicating by post id (AC9: the same
+  // Group the parsed posts by channel, de-duplicating by post id (the same
   // post can appear twice in one page's blocks; keep the first occurrence so it
   // alerts once, but the id itself still counts for the highest-seen state).
   const byChannel = {};
@@ -244,7 +244,7 @@ function main() {
     const problemKey = 'problem_' + key;
     const lastKey = 'lastSeen_' + key;
 
-    // AC10: a channel with no post blocks gets one notice, then stays quiet
+    // A channel with no post blocks gets one notice, then stays quiet
     // until it recovers.
     if (group.length === 0) {
       if (!staticData[problemKey]) {
@@ -260,7 +260,7 @@ function main() {
     let hasState = Object.prototype.hasOwnProperty.call(staticData, lastKey);
     let lastSeen = null;
     if (hasState) {
-      // AC9: coerce whatever is in static data to a number right away. A string
+      // Coerce whatever is in static data to a number right away. A string
       // like "5" (hand-edited state) must behave as 5, not take part in "5" + 1
       // string concatenation; anything that is not a finite number (NaN, object,
       // array) is treated the same as a missing value, i.e. no state.
@@ -269,7 +269,7 @@ function main() {
       else hasState = false;
     }
 
-    // AC9: a jump at the bottom of the page means posts may have scrolled off.
+    // A jump at the bottom of the page means posts may have scrolled off.
     const possibleGap = hasState && lastSeen != null && lowest > lastSeen + 1;
 
     let candidates;
@@ -285,7 +285,7 @@ function main() {
       candidates = group.filter((p) => p.postId > lastSeen);
     }
 
-    // AC8: state always advances to the highest id seen, even with no match.
+    // State always advances to the highest id seen, even with no match.
     staticData[lastKey] = hasState ? Math.max(lastSeen, highest) : highest;
 
     if (baseline) {
@@ -302,7 +302,7 @@ function main() {
       if (hits && hits.length > 0) matched.push({ post: p, matched: hits });
     }
 
-    // AC9 cap: send only the NEWEST maxAlerts, in chronological order, then a summary.
+    // Cap: send only the NEWEST maxAlerts, in chronological order, then a summary.
     let overflow = 0;
     let shown = matched;
     if (matched.length > maxAlerts) {

@@ -20,7 +20,7 @@ function post(channel, id, text) {
 }
 const alerts = (out) => out.filter((i) => i.json.kind === 'alert');
 
-test('AC9: a gap at the bottom of the page sets possibleGap and notes it', () => {
+test('a gap at the bottom of the page sets possibleGap and notes it', () => {
   if (!built()) return;
   const channelItems = [channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: false })];
   const state = { lastSeen_examplechannel: 100 };
@@ -34,7 +34,7 @@ test('AC9: a gap at the bottom of the page sets possibleGap and notes it', () =>
   assert.match(a[0].json.text, /more often/i);
 });
 
-test('AC9: no gap when the page continues from the last seen post', () => {
+test('no gap when the page continues from the last seen post', () => {
   if (!built()) return;
   const channelItems = [channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: false })];
   const state = { lastSeen_examplechannel: 100 };
@@ -46,7 +46,7 @@ test('AC9: no gap when the page continues from the last seen post', () => {
   }
 });
 
-test('AC9: cap sends only the newest N matches plus a summary, and advances state', () => {
+test('cap sends only the newest N matches plus a summary, and advances state', () => {
   if (!built()) return;
   const channelItems = [channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: false, maxAlertsPerRun: 3 })];
   const inputItems = [];

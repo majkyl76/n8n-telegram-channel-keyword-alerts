@@ -24,7 +24,7 @@ function rng(seed) {
 const SEED = 1234567;
 const ALPHABET = 'abcdef ŻÓŁĆ <>&"\'\n\t äé😀#@/.$+'.split('');
 
-test('AC11 property: 400 random posts always build a message under 4096 chars', () => {
+test('property: 400 random posts always build a message under 4096 chars', () => {
   if (!built()) return;
   const rand = rng(SEED);
   for (let i = 0; i < 400; i++) {
@@ -53,7 +53,7 @@ test('AC11 property: 400 random posts always build a message under 4096 chars', 
   }
 });
 
-test('AC7 property: a whole word always matches, an embedded one never does', () => {
+test('property: a whole word always matches, an embedded one never does', () => {
   if (!built()) return;
   const rand = rng(SEED + 1);
   const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');

@@ -1,4 +1,4 @@
-// Regression tests for parsing and formatting edge cases (AC15..AC19).
+// Regression tests for parsing and formatting edge cases.
 // All behaviour is exercised through the shipped Code node's input and output.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -26,9 +26,9 @@ function built() {
   return true;
 }
 
-test('AC15: message stays under 4096 with a 5000-char link and 300 matched keywords', () => {
+test('message stays under 4096 with a 5000-char link and 300 matched keywords', () => {
   if (!built()) return;
-  // AC16 derives the link from the channel and id, so a huge link only arises from
+  // The link is derived from the channel and id, so a huge link only arises from
   // a huge channel name: use one to drive both the long-link and long-header path.
   const channel = 'a'.repeat(5000);
   const keywords = Array.from({ length: 300 }, (_, i) => 'kw' + String(i).padStart(3, '0'));
@@ -41,7 +41,7 @@ test('AC15: message stays under 4096 with a 5000-char link and 300 matched keywo
   assert.match(a.text, /<a href="[^"]*">Open post<\/a>\s*$/);
 });
 
-test('AC15: a very long matched-keyword list alone is cut, message stays bounded', () => {
+test('a very long matched-keyword list alone is cut, message stays bounded', () => {
   if (!built()) return;
   const keywords = Array.from({ length: 300 }, (_, i) => 'longkw' + String(i).padStart(3, '0'));
   const a = alertFor({ channel: 'examplechannel', postId: 10, text: keywords.join(' '), keywords });
@@ -50,7 +50,7 @@ test('AC15: a very long matched-keyword list alone is cut, message stays bounded
   assert.match(a.text, /<a href="https:\/\/t\.me\/examplechannel\/10">Open post<\/a>\s*$/);
 });
 
-test('AC16: the post link is built from the channel and id, not the page href', () => {
+test('the post link is built from the channel and id, not the page href', () => {
   if (!built()) return;
   const a = alertFor({
     channel: 'examplechannel',
@@ -64,7 +64,7 @@ test('AC16: the post link is built from the channel and id, not the page href', 
   assert.ok(!a.text.includes('evil.example'), 'hostile href must not reach the message');
 });
 
-test('AC17: no $testExpose or test hook ships in any Code node', () => {
+test('no $testExpose or test hook ships in any Code node', () => {
   if (!built()) return;
   const wf = loadWorkflow();
   for (const node of wf.nodes.filter((n) => n.type === 'n8n-nodes-base.code')) {
@@ -73,7 +73,7 @@ test('AC17: no $testExpose or test hook ships in any Code node', () => {
   }
 });
 
-test('AC19: the parsing nodes between HTTP and Code continue on error', () => {
+test('the parsing nodes between HTTP and Code continue on error', () => {
   if (!built()) return;
   const wf = loadWorkflow();
   for (const name of ['Split page into post blocks', 'Split out each post', 'Extract fields from each post']) {
@@ -83,7 +83,7 @@ test('AC19: the parsing nodes between HTTP and Code continue on error', () => {
   }
 });
 
-test('AC19: an error/empty item is treated as a channel with no posts, not a crash', () => {
+test('an error/empty item is treated as a channel with no posts, not a crash', () => {
   if (!built()) return;
   // A dropped connection forwards an item with no post data; the Code node must
   // not throw and must treat the channel as having returned nothing.
@@ -96,7 +96,7 @@ test('AC19: an error/empty item is treated as a channel with no posts, not a cra
   assert.equal(out.filter((j) => j.kind === 'notice').length, 1, 'one no-posts notice');
 });
 
-test('AC19: one dead item does not stop a healthy channel in the same run', () => {
+test('one dead item does not stop a healthy channel in the same run', () => {
   if (!built()) return;
   const out = runFindNew({
     inputItems: [{}, { postId: 'examplechannel/5', text: 'match here', isoDate: '2026-07-16T20:45:25+00:00', views: '1K' }],
@@ -110,7 +110,7 @@ test('AC19: one dead item does not stop a healthy channel in the same run', () =
   assert.equal(out.filter((j) => j.kind === 'alert').length, 1, 'examplechannel still alerts');
 });
 
-test('AC9: two post blocks with the same data-post id on one page produce only one alert', () => {
+test('two post blocks with the same data-post id on one page produce only one alert', () => {
   if (!built()) return;
   const inputItems = [
     { postId: 'examplechannel/5', text: 'first match', isoDate: '2026-07-16T20:45:25+00:00', url: 'https://t.me/examplechannel/5', views: '1K' },
@@ -130,19 +130,19 @@ test('AC9: two post blocks with the same data-post id on one page produce only o
   assert.equal(staticData.lastSeen_examplechannel, 9, 'state still advances to the highest id seen on the page');
 });
 
-test('AC4: rejects maxAlertsPerRun given as the boolean true', () => {
+test('rejects maxAlertsPerRun given as the boolean true', () => {
   if (!built()) return;
   // Number(true) is 1, which previously slipped past the positive-integer check.
   assert.throws(() => runCheckSettings(settingsCfg({ maxAlertsPerRun: true })), /maxAlertsPerRun/);
 });
 
-test('AC4: rejects maxAlertsPerRun given as an array', () => {
+test('rejects maxAlertsPerRun given as an array', () => {
   if (!built()) return;
   // Number([5]) is 5 via Array#toString, which previously slipped past the check.
   assert.throws(() => runCheckSettings(settingsCfg({ maxAlertsPerRun: [5] })), /maxAlertsPerRun/);
 });
 
-test('AC6: emoji alt attribute is captured when it comes before class', () => {
+test('emoji alt attribute is captured when it comes before class', () => {
   if (!built()) return;
   const a = alertFor({ text: '<i alt="🎉" class="emoji"></i> celebrate time', keywords: ['celebrate'] });
   assert.ok(a, 'post should alert');
@@ -166,14 +166,14 @@ function hasLoneSurrogate(s) {
   return false;
 }
 
-test('AC7: a keyword containing a hyphen matches literally without throwing (work-from-home)', () => {
+test('a keyword containing a hyphen matches literally without throwing (work-from-home)', () => {
   if (!built()) return;
   const a = alertFor({ text: 'Remote work-from-home roles added today', keywords: ['work-from-home'] });
   assert.ok(a, 'hyphenated keyword should match');
   assert.deepEqual(a.matchedKeywords, ['work-from-home']);
 });
 
-test('AC7: a hyphenated exclude keyword vetoes a match without throwing (work-from-home)', () => {
+test('a hyphenated exclude keyword vetoes a match without throwing (work-from-home)', () => {
   if (!built()) return;
   const out = runOne({
     text: 'Remote work-from-home roles added today',
@@ -183,7 +183,7 @@ test('AC7: a hyphenated exclude keyword vetoes a match without throwing (work-fr
   assert.equal(out.length, 0, 'excluded post must not alert');
 });
 
-test('AC7: hyphenated keywords match literally with matchWholeWords on (T-Mobile, COVID-19, a-b)', () => {
+test('hyphenated keywords match literally with matchWholeWords on (T-Mobile, COVID-19, a-b)', () => {
   if (!built()) return;
   for (const kw of ['T-Mobile', 'COVID-19', 'a-b']) {
     const good = alertFor({ text: `see ${kw} here`, keywords: [kw], matchWholeWords: true });
@@ -195,7 +195,7 @@ test('AC7: hyphenated keywords match literally with matchWholeWords on (T-Mobile
   }
 });
 
-test('AC7: hyphenated keywords match as a substring with matchWholeWords off (T-Mobile, COVID-19, a-b)', () => {
+test('hyphenated keywords match as a substring with matchWholeWords off (T-Mobile, COVID-19, a-b)', () => {
   if (!built()) return;
   for (const kw of ['T-Mobile', 'COVID-19', 'a-b']) {
     const a = alertFor({ text: `prefix${kw}suffix`, keywords: [kw], matchWholeWords: false });
@@ -203,7 +203,7 @@ test('AC7: hyphenated keywords match as a substring with matchWholeWords off (T-
   }
 });
 
-test('AC7: hyphenated exclude keywords veto with matchWholeWords on and off (T-Mobile, COVID-19, a-b)', () => {
+test('hyphenated exclude keywords veto with matchWholeWords on and off (T-Mobile, COVID-19, a-b)', () => {
   if (!built()) return;
   for (const kw of ['T-Mobile', 'COVID-19', 'a-b']) {
     const vetoedWhole = runOne({
@@ -223,7 +223,7 @@ test('AC7: hyphenated exclude keywords veto with matchWholeWords on and off (T-M
   }
 });
 
-test('AC11: cutSnippet never leaves a lone surrogate at the cut (498 chars + emoji + 50 chars)', () => {
+test('cutSnippet never leaves a lone surrogate at the cut (498 chars + emoji + 50 chars)', () => {
   if (!built()) return;
   const text = 'x'.repeat(498) + '😀' + 'y'.repeat(50) + ' propertymatch';
   const a = alertFor({ text, keywords: ['propertymatch'] });
@@ -232,7 +232,7 @@ test('AC11: cutSnippet never leaves a lone surrogate at the cut (498 chars + emo
   assert.ok(!hasLoneSurrogate(a.text), 'full alert text must not contain a lone surrogate');
 });
 
-test('AC15: clip never leaves a lone surrogate in the matched-keyword list (299 chars + emoji)', () => {
+test('clip never leaves a lone surrogate in the matched-keyword list (299 chars + emoji)', () => {
   if (!built()) return;
   const keyword = 'a'.repeat(299) + '🚀';
   const a = alertFor({ text: keyword + ' more text', keywords: [keyword] });
@@ -240,7 +240,7 @@ test('AC15: clip never leaves a lone surrogate in the matched-keyword list (299 
   assert.ok(!hasLoneSurrogate(a.text), 'alert text must not contain a lone surrogate at the matched-list cut');
 });
 
-test('AC9: a string lastSeen is coerced to a number so a real gap is still flagged', () => {
+test('a string lastSeen is coerced to a number so a real gap is still flagged', () => {
   if (!built()) return;
   const out = runFindNew({
     inputItems: [
