@@ -154,8 +154,8 @@ keywords** node:
   servers (a fake preview page and a fake Telegram Bot API), and asserts on
   the real executions: baseline, new matches, no repeats, the alert cap with
   its summary, the gap note, and a dead or dropped channel not stopping the
-  others. The real Telegram Bot API is never called. A full run is recorded
-  in `samples/e2e-run.txt`.
+  others. The real Telegram Bot API is never called. Run it yourself against
+  a local n8n instance to see a full run.
 
 ## Sample output
 
