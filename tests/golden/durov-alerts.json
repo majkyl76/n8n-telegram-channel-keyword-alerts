@@ -1,0 +1,91 @@
+[
+  {
+    "send": true,
+    "kind": "alert",
+    "channel": "durov",
+    "chatId": "12345",
+    "postId": 545,
+    "url": "https://t.me/durov/545",
+    "isoDate": "2026-08-30T09:10:19+00:00",
+    "views": "3.11M",
+    "snippet": "A high-school student just made $20,000 from a Telegram Gift. Jonathan He, an IOI gold medalist ranked #7 in the world, sold his Algorithm Cup — an NFT we gave to the top young coders this month — for 💎 15,000 Grams. Happy for him. It's a meaningful sum for someone still in school, and I suspect a small fraction of what he'll go on to build. 20 years ago, $20K was enough for me to launch my first company. Within months, it had reached 1M users and raised $12M at a $60M valuation. 💸 I hope…",
+    "matchedKeywords": [
+      "Telegram"
+    ],
+    "possibleGap": false,
+    "text": "<b>@durov</b>\n2026-08-30 09:10 UTC\n\nA high-school student just made $20,000 from a Telegram Gift. Jonathan He, an IOI gold medalist ranked #7 in the world, sold his Algorithm Cup — an NFT we gave to the top young coders this month — for 💎 15,000 Grams. Happy for him. It's a meaningful sum for someone still in school, and I suspect a small fraction of what he'll go on to build. 20 years ago, $20K was enough for me to launch my first company. Within months, it had reached 1M users and raised $12M at a $60M valuation. 💸 I hope…\n\nMatched: Telegram\n<a href=\"https://t.me/durov/545\">Open post</a>"
+  },
+  {
+    "send": true,
+    "kind": "alert",
+    "channel": "durov",
+    "chatId": "12345",
+    "postId": 546,
+    "url": "https://t.me/durov/546",
+    "isoDate": "2026-08-31T16:30:15+00:00",
+    "views": "4.12M",
+    "snippet": "🏳️ Gram Wallet in Telegram is ready and is now accessible to a select group of users. 🤩 We'll be gradually rolling it out to our billion+ users over the next couple of weeks. ⚡️ Thanks to the validators who approved the smart contract that powers it, future upgrades of the wallet won't require painful migrations. This is just one of the innovations we've built to make non-custodial wallets usable ✨",
+    "matchedKeywords": [
+      "Telegram"
+    ],
+    "possibleGap": false,
+    "text": "<b>@durov</b>\n2026-08-31 16:30 UTC\n\n🏳️ Gram Wallet in Telegram is ready and is now accessible to a select group of users. 🤩 We'll be gradually rolling it out to our billion+ users over the next couple of weeks. ⚡️ Thanks to the validators who approved the smart contract that powers it, future upgrades of the wallet won't require painful migrations. This is just one of the innovations we've built to make non-custodial wallets usable ✨\n\nMatched: Telegram\n<a href=\"https://t.me/durov/546\">Open post</a>"
+  },
+  {
+    "send": true,
+    "kind": "alert",
+    "channel": "durov",
+    "chatId": "12345",
+    "postId": 547,
+    "url": "https://t.me/durov/547",
+    "isoDate": "2026-09-06T17:40:39+00:00",
+    "views": "4.06M",
+    "snippet": "💸 In just one month, Telegram has awarded over $2,222,000 to some of the brightest minds on our planet. 🎨 This week alone we distributed $222,000 among the winners of our two latest competitions — the Design Contest and the Digital Freedom Contest. On top of that, over the past month we awarded prizes worth more than $2 million to the winners of the 2026 International Olympiads in Informatics and AI. We're proud to support the best! 🎁",
+    "matchedKeywords": [
+      "AI",
+      "Telegram"
+    ],
+    "possibleGap": false,
+    "text": "<b>@durov</b>\n2026-09-06 17:40 UTC\n\n💸 In just one month, Telegram has awarded over $2,222,000 to some of the brightest minds on our planet. 🎨 This week alone we distributed $222,000 among the winners of our two latest competitions — the Design Contest and the Digital Freedom Contest. On top of that, over the past month we awarded prizes worth more than $2 million to the winners of the 2026 International Olympiads in Informatics and AI. We're proud to support the best! 🎁\n\nMatched: AI, Telegram\n<a href=\"https://t.me/durov/547\">Open post</a>"
+  },
+  {
+    "send": true,
+    "kind": "alert",
+    "channel": "durov",
+    "chatId": "12345",
+    "postId": 548,
+    "url": "https://t.me/durov/548",
+    "isoDate": "2026-09-11T16:04:02+00:00",
+    "views": "3.74M",
+    "snippet": "🤝 Telegram has become the sponsor of Codeforces — the largest competitive programming platform in the world. ⚡CodeForces organizes over 100 coding contests every year and has 4 million contestants signed up. 🌱 Since 2010, I've supported Codeforces through the companies I started. 🆙 But this year will be special. Its founder Mike wants to bring Codeforces to the next level — and we'll be happy to help him do that 🤝",
+    "matchedKeywords": [
+      "Telegram"
+    ],
+    "possibleGap": false,
+    "text": "<b>@durov</b>\n2026-09-11 16:04 UTC\n\n🤝 Telegram has become the sponsor of Codeforces — the largest competitive programming platform in the world. ⚡CodeForces organizes over 100 coding contests every year and has 4 million contestants signed up. 🌱 Since 2010, I've supported Codeforces through the companies I started. 🆙 But this year will be special. Its founder Mike wants to bring Codeforces to the next level — and we'll be happy to help him do that 🤝\n\nMatched: Telegram\n<a href=\"https://t.me/durov/548\">Open post</a>"
+  },
+  {
+    "send": true,
+    "kind": "alert",
+    "channel": "durov",
+    "chatId": "12345",
+    "postId": 552,
+    "url": "https://t.me/durov/552",
+    "isoDate": "2026-10-11T14:52:40+00:00",
+    "views": "1.53M",
+    "snippet": "✨ Designers × AI 🆕 The mockup era is over. Today’s AI tools give every designer a superpower: you can now craft your ideas, not just draw them. The gap between “what if…?” and “look, it works!” has never been smaller, and that changed how we build features in Telegram. Message @designers to submit your concepts. ✔️ We accept – Working, ready-to-implement code complemented by – A demo video of your feature in action 🗑 We no longer accept – Static mockups – Demo videos with no code behind them…",
+    "matchedKeywords": [
+      "AI",
+      "Telegram"
+    ],
+    "possibleGap": false,
+    "text": "<b>@durov</b>\n2026-10-11 14:52 UTC\n\n✨ Designers × AI 🆕 The mockup era is over. Today’s AI tools give every designer a superpower: you can now craft your ideas, not just draw them. The gap between “what if…?” and “look, it works!” has never been smaller, and that changed how we build features in Telegram. Message @designers to submit your concepts. ✔️ We accept – Working, ready-to-implement code complemented by – A demo video of your feature in action 🗑 We no longer accept – Static mockups – Demo videos with no code behind them…\n\nMatched: AI, Telegram\n<a href=\"https://t.me/durov/552\">Open post</a>"
+  },
+  {
+    "send": true,
+    "kind": "summary",
+    "channel": "durov",
+    "chatId": "12345",
+    "text": "+12 more matching posts not shown"
+  }
+]
