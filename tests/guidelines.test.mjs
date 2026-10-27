@@ -34,7 +34,7 @@ test('build: workflow.json is not stale', () => {
   assert.equal(onDisk, serialize(), 'workflow.json differs from build output; run npm run build');
 });
 
-test('AC1: valid importable structure with required keys', () => {
+test('valid importable structure with required keys', () => {
   need();
   for (const key of ['name', 'nodes', 'connections', 'settings']) {
     assert.ok(key in wf, 'missing key ' + key);
@@ -47,7 +47,7 @@ test('AC1: valid importable structure with required keys', () => {
   assert.ok(!(wf.meta && wf.meta.instanceId), 'no meta.instanceId');
 });
 
-test('AC1: node names and ids are unique', () => {
+test('node names and ids are unique', () => {
   need();
   const names = wf.nodes.map((n) => n.name);
   const ids = wf.nodes.map((n) => n.id);
@@ -55,7 +55,7 @@ test('AC1: node names and ids are unique', () => {
   assert.equal(new Set(ids).size, ids.length, 'duplicate node ids');
 });
 
-test('AC1: connections reference existing nodes', () => {
+test('connections reference existing nodes', () => {
   need();
   const names = new Set(wf.nodes.map((n) => n.name));
   for (const [src, conn] of Object.entries(wf.connections)) {
@@ -68,7 +68,7 @@ test('AC1: connections reference existing nodes', () => {
   }
 });
 
-test('AC1: every functional node is reachable from a trigger', () => {
+test('every functional node is reachable from a trigger', () => {
   need();
   const adj = {};
   for (const [src, conn] of Object.entries(wf.connections)) {
@@ -91,12 +91,12 @@ test('AC1: every functional node is reachable from a trigger', () => {
   }
 });
 
-test('AC1: no disabled nodes', () => {
+test('no disabled nodes', () => {
   need();
   for (const n of wf.nodes) assert.notEqual(n.disabled, true, n.name + ' is disabled');
 });
 
-test('AC1: no orphan nodes (every non-trigger, non-sticky node has an input)', () => {
+test('no orphan nodes (every non-trigger, non-sticky node has an input)', () => {
   need();
   const targets = new Set();
   for (const conn of Object.values(wf.connections)) {
@@ -110,10 +110,10 @@ test('AC1: no orphan nodes (every non-trigger, non-sticky node has an input)', (
   }
 });
 
-test('AC1: every node type and typeVersion exists in installed n8n', () => {
+test('every node type and typeVersion exists in installed n8n', (t) => {
   need();
-  if (!existsSync(N8N_NODES_BASE)) {
-    console.log('SKIP: n8n-nodes-base not installed at ' + N8N_NODES_BASE);
+  if (!N8N_NODES_BASE || !existsSync(N8N_NODES_BASE)) {
+    t.skip('N8N_NODES_BASE is not set (or does not exist); skipping node-version check');
     return;
   }
   for (const n of wf.nodes) {
@@ -125,7 +125,7 @@ test('AC1: every node type and typeVersion exists in installed n8n', () => {
   }
 });
 
-test('AC1: workflow name is a plain verb-first title under 80 chars', () => {
+test('workflow name is a plain verb-first title under 80 chars', () => {
   need();
   assert.ok(wf.name.length <= 80, 'name too long');
   assert.match(wf.name, /^[A-Z][a-z]+ /, 'name should start with a capitalised verb');
@@ -133,7 +133,7 @@ test('AC1: workflow name is a plain verb-first title under 80 chars', () => {
   assert.ok(!/[^\x00-\x7F]/.test(wf.name), 'name has non-ASCII/emoji');
 });
 
-test('AC5: no node uses an n8n default name', () => {
+test('no node uses an n8n default name', () => {
   need();
   const DEFAULTS = /^(HTTP Request|Set|Edit Fields|Code|If|Telegram|Schedule Trigger|Manual Trigger|HTML|Split Out)\d*$/;
   for (const n of wf.nodes) {
@@ -143,7 +143,7 @@ test('AC5: no node uses an n8n default name', () => {
   }
 });
 
-test('AC2: exactly one yellow main sticky at the top-left', () => {
+test('exactly one yellow main sticky at the top-left', () => {
   need();
   const stickies = wf.nodes.filter(isSticky);
   const nonSticky = wf.nodes.filter((n) => !isSticky(n));
@@ -161,7 +161,7 @@ test('AC2: exactly one yellow main sticky at the top-left', () => {
   }
 });
 
-test('AC2: main sticky word count and required headings', () => {
+test('main sticky word count and required headings', () => {
   need();
   const main = wf.nodes.filter(isSticky).find((s) => (s.parameters.color || 1) === 1);
   const text = main.parameters.content;
@@ -176,7 +176,7 @@ test('AC2: main sticky word count and required headings', () => {
   assert.match(text, /static data/i);
 });
 
-test('AC2: white section stickies each cover >= 2 nodes and not the main sticky', () => {
+test('white section stickies each cover >= 2 nodes and not the main sticky', () => {
   need();
   const stickies = wf.nodes.filter(isSticky);
   const main = stickies.find((s) => (s.parameters.color || 1) === 1);
@@ -197,7 +197,7 @@ test('AC2: white section stickies each cover >= 2 nodes and not the main sticky'
   }
 });
 
-test('AC2: at most one red sticky, covering exactly one node, on the Telegram node', () => {
+test('at most one red sticky, covering exactly one node, on the Telegram node', () => {
   need();
   const stickies = wf.nodes.filter(isSticky);
   const red = stickies.filter((s) => s.parameters.color === 3);
@@ -210,7 +210,7 @@ test('AC2: at most one red sticky, covering exactly one node, on the Telegram no
   }
 });
 
-test('AC2: only the expected sticky colours are used', () => {
+test('only the expected sticky colours are used', () => {
   need();
   for (const s of wf.nodes.filter(isSticky)) {
     const c = s.parameters.color || 1;
@@ -218,7 +218,7 @@ test('AC2: only the expected sticky colours are used', () => {
   }
 });
 
-test('AC3: no secrets anywhere in the JSON', () => {
+test('no secrets anywhere in the JSON', () => {
   need();
   const raw = JSON.stringify(wf);
   assert.ok(!/\d{6,12}:[A-Za-z0-9_-]{30,}/.test(raw), 'looks like a bot token');
@@ -229,7 +229,7 @@ test('AC3: no secrets anywhere in the JSON', () => {
   assert.ok(!/majkyl76@|@gmail\.com/i.test(raw), 'contains a personal email');
 });
 
-test('AC3: Telegram credential referenced by name only, no id', () => {
+test('Telegram credential referenced by name only, no id', () => {
   need();
   const tg = wf.nodes.find((n) => n.type === 'n8n-nodes-base.telegram');
   assert.ok(tg, 'telegram node present');
@@ -242,7 +242,7 @@ test('AC3: Telegram credential referenced by name only, no id', () => {
   }
 });
 
-test('AC12: honest limits appear in the main sticky', () => {
+test('honest limits appear in the main sticky', () => {
   need();
   const main = wf.nodes.filter(isSticky).find((s) => (s.parameters.color || 1) === 1);
   const t = main.parameters.content.toLowerCase();
@@ -254,7 +254,7 @@ test('AC12: honest limits appear in the main sticky', () => {
   assert.match(t, /one request per channel|one second gap/);
 });
 
-test('AC13: README, LISTING and sticky text pass copy lint', () => {
+test('README, LISTING and sticky text pass copy lint', () => {
   need();
   const issues = [];
   for (const f of ['README.md', 'LISTING.md']) {

@@ -9,13 +9,20 @@
 //
 // Cheerio's .html() returns INNER html (see n8n-nodes-base Html/utils.js getValue),
 // which is exactly what the HTML node returns for returnValue "html".
+//
+// Requires N8N_NODES_BASE (a local n8n install's `n8n-nodes-base/dist/nodes`
+// directory) so Cheerio can be loaded from that install's node_modules.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 
-const scriptsDir = dirname(fileURLToPath(import.meta.url));
-const require = createRequire(join(scriptsDir, '..', '..', '..', 'n8n-local', 'node_modules') + '/');
+const nodesBase = process.env.N8N_NODES_BASE;
+if (!nodesBase) {
+  console.error('N8N_NODES_BASE is not set. Point it at a local n8n install\'s ' +
+    '"n8n-nodes-base/dist/nodes" directory to regenerate fixtures.');
+  process.exit(1);
+}
+const require = createRequire(join(nodesBase, '..', '..', '..') + '/');
 const cheerio = require('cheerio');
 
 // Per-post extraction map, identical to the second HTML node's extractionValues.
