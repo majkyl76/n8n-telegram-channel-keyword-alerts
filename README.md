@@ -60,7 +60,9 @@ email (SMTP) or webhook node. Each outgoing item carries `chatId` and a ready-ma
 ## Limits
 
 - The preview shows roughly the latest 20 posts per channel. A very busy channel can
-  scroll posts off between runs. The alert notes this and suggests running more often.
+  scroll posts off between runs. When a run has a matching post, the alert notes this and
+  suggests running more often. A gap in a run with no matching post is silent, because the
+  note rides on the alert message.
 - Only public channels with a web preview work. Private channels and groups do not.
 - Telegram can change the preview HTML, which may need the selectors updated.
 - This is polite scraping: one request per channel per run, with a one second gap and

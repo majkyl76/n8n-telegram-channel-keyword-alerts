@@ -51,10 +51,16 @@ SPEC.md (the contract) and CLAUDE.md (the conventions).
   552, so the page itself has a 549-550 gap); none gives 0. The captured HTML in
   `fixtures/durov.html` and `fixtures/none.html` was not edited.
 
-- **Test seam in `src/find-new-posts.js`.** The body exposes its pure helpers only when
-  a `$testExpose` global is present. In n8n that global never exists, and
-  `typeof $testExpose` is safe on an undeclared name, so the node always returns
-  `main()`. This lets the unit tests exercise the shipped functions directly.
+- **No test hook in the shipped code (AC17).** `src/find-new-posts.js` ends with a plain
+  `return main();` and carries no `$testExpose` or other test-only branch. The unit tests
+  load `workflow.json`, pull each Code node's `jsCode`, and run it with the n8n globals
+  stubbed (`tests/helpers.mjs`). Parsing, matching and message building are all observed
+  through the Code node's normal input and output, so nothing test-only ships.
+
+- **Link built from channel and id, not the page href (AC16).** `parsePost` derives the
+  permalink as `https://t.me/<channel>/<id>` from the `data-post` slug and numeric id. The
+  raw `href` the HTML node pulls from the page is ignored, so a hostile href cannot reach
+  any message.
 
 ## Node versions used (all present in the installed n8n 2.44.7)
 
@@ -77,11 +83,11 @@ install is absent.
 ## Exact `npm test` output
 
 ```
-ℹ tests 64
-ℹ pass 64
+ℹ tests 73
+ℹ pass 73
 ℹ fail 0
 ℹ skipped 0
-ℹ duration_ms ~300
+ℹ duration_ms ~400
 ```
 
 Run offline with `npm test` (Node's built-in test runner, no dependencies).
