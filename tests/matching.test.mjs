@@ -32,16 +32,16 @@ test('matching is Unicode-aware (Polish)', () => {
 
 test('whole-word matching with matchWholeWords true', () => {
   if (!built()) return;
-  assert.deepEqual(matched('AI tools are here', ['ai']), ['ai']);
-  assert.deepEqual(matched('look (AI) now', ['ai']), ['ai']);
-  assert.equal(matched('send me mail', ['ai']), null); // embedded, no alert
-  assert.equal(matched('visited Kuwait', ['ai']), null);
+  assert.deepEqual(matched('Tea sale starts today', ['tea']), ['tea']);
+  assert.deepEqual(matched('look (TEA) now', ['tea']), ['tea']);
+  assert.equal(matched('a glass steamed up', ['tea']), null); // embedded, no alert
+  assert.equal(matched('the teacher left', ['tea']), null);
 });
 
 test('substring matching with matchWholeWords false', () => {
   if (!built()) return;
-  assert.deepEqual(matched('send me mail', ['ai'], { whole: false }), ['ai']);
-  assert.deepEqual(matched('Kuwait', ['ai'], { whole: false }), ['ai']);
+  assert.deepEqual(matched('a glass steamed up', ['tea'], { whole: false }), ['tea']);
+  assert.deepEqual(matched('the teacher left', ['tea'], { whole: false }), ['tea']);
 });
 
 test('multi-word phrases match across any whitespace run', () => {

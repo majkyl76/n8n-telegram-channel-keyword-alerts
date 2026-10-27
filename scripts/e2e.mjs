@@ -3,9 +3,9 @@
 //   N8N_URL=http://127.0.0.1:5678 N8N_API_KEY=... node scripts/e2e.mjs
 //
 // It starts two mock servers: one serves channel preview pages built from the
-// fixture page in fixtures/examplechannel.html, the other stands in for the Telegram Bot API.
+// fixture page in fixtures/examplechannel.html, the other stands in for the Telegram API.
 // It imports workflow.json through the public REST API, creates a Telegram
-// credential whose base URL is the mock Bot API, patches ONLY the config node values
+// credential whose base URL is the mock Telegram API, patches ONLY the config node values
 // and the trigger interval in the imported copy, activates the workflow and asserts
 // what the real n8n executions did. Nothing leaves the machine.
 import { createServer } from 'node:http';
@@ -60,7 +60,7 @@ const posts = {
 };
 
 let phase = 'baseline';
-const hits = { preview: [], bot: [] };
+const hits = { preview: [], tg: [] };
 function previewFor(channel) {
   if (channel === 'ghost') return { status: 200, body: none };
   if (channel === 'boomer') return { status: 500, body: 'boomer' };
@@ -81,21 +81,21 @@ const startMocks = () =>
       res.writeHead(r.status, { 'content-type': 'text/html; charset=utf-8' });
       res.end(r.body);
     });
-    const bot = createServer((req, res) => {
+    const tg = createServer((req, res) => {
       let body = '';
       req.on('data', (c) => (body += c));
       req.on('end', () => {
         let parsed = body;
         try { parsed = JSON.parse(body); } catch {}
-        hits.bot.push({ url: req.url, body: parsed });
+        hits.tg.push({ url: req.url, body: parsed });
         if (req.url.endsWith('/sendMessage')) { sent.push(parsed); sentLog.push({ ts: Date.now(), msg: parsed, id: sent.length }); }
         res.writeHead(200, { 'content-type': 'application/json' });
         res.end(JSON.stringify({ ok: true, result: { message_id: sent.length, chat: { id: 1 }, date: 1, text: 'ok' } }));
       });
     });
     preview.listen(0, '127.0.0.1', () =>
-      bot.listen(0, '127.0.0.1', () =>
-        resolve({ preview, bot, previewBase: `http://127.0.0.1:${preview.address().port}/s/`, botBase: `http://127.0.0.1:${bot.address().port}` }),
+      tg.listen(0, '127.0.0.1', () =>
+        resolve({ preview, tg, previewBase: `http://127.0.0.1:${preview.address().port}/s/`, tgBase: `http://127.0.0.1:${tg.address().port}` }),
       ),
     );
   });
@@ -164,7 +164,7 @@ async function main() {
   try {
     const cred = await api('/credentials', {
       method: 'POST',
-      body: JSON.stringify({ name: 'e2e Telegram Bot account', type: 'telegramApi', data: { accessToken: '123456:E2E-LOCAL-MOCK-TOKEN', baseUrl: mocks.botBase } }),
+      body: JSON.stringify({ name: 'e2e Telegram account', type: 'telegramApi', data: { accessToken: '123456:E2E-LOCAL-MOCK-TOKEN', baseUrl: mocks.tgBase } }),
     });
     created.credential = cred.id;
     const wf = JSON.parse(readFileSync(process.env.WORKFLOW_FILE || join(root, 'workflow.json'), 'utf8'));
@@ -283,7 +283,7 @@ async function main() {
     }
     if (created.credential) await api(`/credentials/${created.credential}`, { method: 'DELETE' }).catch(() => {});
     mocks.preview.close();
-    mocks.bot.close();
+    mocks.tg.close();
   }
   const failed = results.filter(([, s]) => s !== 'PASS');
   console.log(`\ne2e summary: ${results.length - failed.length}/${results.length} passed`);

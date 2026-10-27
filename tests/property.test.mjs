@@ -31,7 +31,7 @@ test('property: 400 random posts always build a message under 4096 chars', () =>
     const len = Math.floor(rand() * 2000);
     let text = '';
     for (let j = 0; j < len; j++) text += ALPHABET[Math.floor(rand() * ALPHABET.length)];
-    // Guarantee a match so the post alerts: append a sentinel keyword.
+    // Guarantee a match so the post alerts: append a known keyword.
     text += ' propertymatch';
     const channel = 'ch' + Math.floor(rand() * 1e6);
     const gap = rand() < 0.5;
