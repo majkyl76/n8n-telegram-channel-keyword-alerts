@@ -78,6 +78,71 @@ markup. What I would change: build the mock pages from the same Cheerio split
 that `scripts/make-fixture-items.mjs` already uses, or assert on the CSS
 selector rather than a literal string.
 
+## Review of commit 7db78ec (the PM hand edit to scripts/e2e.mjs)
+
+Scope: `git diff 65b0fca 7db78ec -- scripts/e2e.mjs`. The edit tried to answer F1
+and F2. It adds a per-message/per-fetch timestamp (`sentLog`, `ts` on preview
+hits), stops clearing `sent`/`hits.preview` at phase start, and in `runPhase`
+counts only messages and fetches whose `ts` falls in
+`[exec.startedAt - 50, exec.stoppedAt + 500]`. It also adds two length guards
+(F2). The e2e was not run (no live n8n), so these are reasoned, not observed.
+
+### G1 (medium): the overlap in F1 is still not fixed, only narrowed
+A time window keyed on ONE execution's start/stop cannot separate two executions
+that are alive at the same wall-clock time. The schedule fires every
+`TICK_SECONDS` (6 s) and is never paused between phases. One run touches three
+channels at a 1 s batch interval; the `dropped-connection` run adds HTTP
+retry-on-fail (2x) on the reset socket plus Telegram send retries (3x, 2 s wait).
+If any run exceeds 6 s the next tick starts a concurrent execution, and its
+`sendMessage` calls land inside the first execution's `[startedAt, stoppedAt]`
+window (and its preview fetches inside the fetch window). So the strict counts
+that F1 named as the victims (`r.sent.length === 2`, `=== 11`, `=== 0`,
+`=== 1`, and the `r.fetches` `deepEqual`) can still be off by exactly the
+messages/fetches of an overlapping run. The edit only drops a straggler that
+arrives WELL outside the window; it does nothing for genuine concurrency, which
+is the case F1 was about. The `+ 500` ms grace on `to` makes the tail worse: if
+the next tick's execution starts within 500 ms of this one stopping and sends
+quickly, that message is attributed to this phase.
+
+Change to make (do not rely on wall clock at all). The returned execution already
+carries exactly what IT sent: `outOf(exec, 'Send alert to Telegram')` is the item
+list the Telegram node processed in that one execution. Count and assert against
+that per-execution run data, and keep the mock `sent`/`sentLog` only as a global
+"delivery actually happened at the Bot API" cross-check. Concretely, in
+`runPhase` derive `const mine = outOf(exec, 'Send alert to Telegram').flat()`
+(its `.json` items, which already hold `text`, `chatId`, etc.) rather than
+filtering `sentLog` by time. Alternatively, serialise the phases: deactivate the
+schedule, drive each phase with exactly one run (one activate/deactivate cycle,
+or a manual execution through the REST API), and wait for that execution's
+`stoppedAt` before the next phase, so only one execution is ever alive. Either
+removes the race; the run-data approach is less invasive to the current shape.
+
+### G2 (low): one F2-style gap was left unguarded
+The edit added `assert.equal(r.sent.length, 2, ...)` and
+`assert.ok(r.sent.length >= 10, ...)` to two checks, but
+`newposts: message format ...` still reads `r.sent[1]` (and `r.sent[1].text`)
+with no prior length guard inside that check. If the window under-counts and
+`r.sent` has fewer than two entries, `m.parse_mode` throws
+"Cannot read properties of undefined", which the `check()` wrapper records as an
+opaque FAIL rather than a clear count mismatch. Add
+`assert.ok(r.sent.length >= 2, 'expected two alerts')` as the first line of that
+check, before `const m = r.sent[1]`.
+
+### G3 (nit): the global `sent` array is now write-only except for `message_id`
+With the `sent.length = 0` reset removed, the module-global `sent` is read only
+by `message_id: sent.length` in the mock response; every phase result now comes
+from the windowed `sentLog`/`hits`. That is harmless (the id just keeps
+incrementing), but once G1 moves per-phase counting onto the execution run data,
+`sent` and `sentLog` collapse into a single global delivery log. Worth tidying so
+a later reader does not assume `sent` is per-phase.
+
+### Not a new problem
+- The two added length guards (F2) are correct where applied: they fail first on
+  an empty/short `r.sent` before the `every`/`includes` test can pass vacuously.
+- F3 (onError on all three parsing nodes) and F4 (fixture 20-block coupling) from
+  the earlier pass are unchanged by this edit; F4's brittle string split is still
+  present in `baseline()` and the recommendation there still stands.
+
 ## Not problems (checked to pre-empt false positives)
 - The cap/gap arithmetic is consistent: after `newposts` the state is at 557,
   the `cap` page serves 560..571, so the lowest id 560 exceeds 557+1 and the
