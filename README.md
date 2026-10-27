@@ -84,8 +84,8 @@ regenerates `workflow.json` from `src/`. `npm run lint:copy` checks the writing.
 ## Live import test
 
 Imported unchanged into a local n8n 2.44.7 through the public API, then activated with
-the schedule patched to 6 seconds. A mock preview server (built from a real captured
-`t.me/s/` page) and a mock Telegram Bot API ran on localhost. All 11 end-to-end checks
+the schedule patched to 10 seconds. A mock preview server (built from a real captured
+`t.me/s/` page) and a mock Telegram Bot API ran on localhost. All 12 end-to-end checks
 passed: baseline, new matches, no repeats, the alert cap with a "+2 more" summary, the
-gap note, and one dead channel not stopping the others. The real Telegram Bot API was
+gap note, and a dead channel or a dropped connection not stopping the others. The real Telegram Bot API was
 not called. See `samples/e2e-run.txt` and `VERIFICATION.md`.

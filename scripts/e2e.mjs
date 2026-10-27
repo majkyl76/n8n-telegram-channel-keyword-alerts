@@ -20,7 +20,9 @@ if (!N8N_URL || !N8N_API_KEY) {
   console.log('e2e: set N8N_URL and N8N_API_KEY to run the live end-to-end test. Skipping.');
   process.exit(0);
 }
-const TICK_SECONDS = 6;
+// 10 s, not 6: a run with a dropped connection retries and takes about 5 s, so a 6 s tick
+// left no margin and runs of the same workflow could overlap (REVIEW-2 G1).
+const TICK_SECONDS = Number(process.env.TICK_SECONDS || 10);
 const CHAT_ID = '424242';
 
 // ---------- preview pages from the real fixture ----------
@@ -86,7 +88,7 @@ const startMocks = () =>
         let parsed = body;
         try { parsed = JSON.parse(body); } catch {}
         hits.bot.push({ url: req.url, body: parsed });
-        if (req.url.endsWith('/sendMessage')) { sent.push(parsed); sentLog.push({ ts: Date.now(), msg: parsed }); }
+        if (req.url.endsWith('/sendMessage')) { sent.push(parsed); sentLog.push({ ts: Date.now(), msg: parsed, id: sent.length }); }
         res.writeHead(200, { 'content-type': 'application/json' });
         res.end(JSON.stringify({ ok: true, result: { message_id: sent.length, chat: { id: 1 }, date: 1, text: 'ok' } }));
       });
@@ -134,7 +136,9 @@ async function waitForRun(workflowId, afterMs, timeoutMs = 60000) {
 const outOf = (exec, node) => (exec.data?.resultData?.runData?.[node]?.[0]?.data?.main ?? []).map((b) => (b || []).map((i) => i.json));
 
 async function runPhase(workflowId, name) {
-  await sleep(1500); // let any in-flight execution drain
+  // No sleep before taking T: in one run the first execution after activation started during
+  // a 1.5 s sleep here, so the baseline phase awaited the second run and saw no notices.
+  // Messages are tied to the execution by message_id below, so no drain is needed.
   phase = name;
   const T = Date.now();
   const exec = await waitForRun(workflowId, T);
@@ -142,9 +146,14 @@ async function runPhase(workflowId, name) {
   // Count only what arrived during this execution, so a straggler from the previous run cannot leak in.
   const from = new Date(exec.startedAt).getTime() - 50;
   const to = new Date(exec.stoppedAt).getTime() + 500;
-  const mine = sentLog.filter((e) => e.ts >= from && e.ts <= to).map((e) => e.msg);
+  // Messages are tied to this execution by the message_id the mock returned to its
+  // Telegram node, so a run that overlaps in time cannot add or take messages (REVIEW-2 G1).
+  const ids = new Set(outOf(exec, 'Send alert to Telegram').flat().map((j) => j?.message_id ?? j?.result?.message_id).filter((x) => x != null));
+  const mine = sentLog.filter((e) => ids.has(e.id)).map((e) => e.msg);
+  const inWindow = sentLog.filter((e) => e.ts >= from && e.ts <= to).length;
+  if (inWindow !== mine.length) console.log(`   note: ${inWindow} messages arrived during this execution's window, ${mine.length} belong to it`);
   const fetched = hits.preview.filter((h) => h.ts >= from && h.ts <= to);
-  console.log(`-- phase ${name}: execution ${exec.id} status=${exec.status}, messages sent=${mine.length}, preview fetches=${fetched.map((h) => h.name).join(',')}`);
+  console.log(`-- phase ${name}: execution ${exec.id} status=${exec.status} (${to - 500 - from - 50} ms), messages sent=${mine.length}, preview fetches=${fetched.map((h) => h.name).join(',')}`);
   if (exec.status !== 'success') console.log('   execution error:', JSON.stringify(exec.data?.resultData?.error ?? {}, null, 1).slice(0, 1200), 'lastNode=', exec.data?.resultData?.lastNodeExecuted);
   return { exec, sent: mine, fetches: fetched };
 }
@@ -213,6 +222,7 @@ async function main() {
       for (const id of [554, 555, 557]) assert.ok(!all.includes(`alpha/${id}`), `post ${id} alerted`);
     });
     check('newposts: message format (HTML parse mode, escaping, matched keywords, link)', () => {
+      assert.ok(r.sent.length >= 2, 'expected two alerts, got ' + r.sent.length); // REVIEW-2 G2
       const m = r.sent[1];
       assert.equal(m.parse_mode, 'HTML');
       assert.match(m.text, /Matched: .*(remote|żółć)/i);

@@ -13,9 +13,9 @@ Run on 2026-10-27 (Europe/Warsaw) with Node 24.22.1 and a local n8n 2.44.7.
 | AC10 | Empty or failing channels | `npm test` | pass | `tests/channel-problems.test.mjs` |
 | AC11 | Message format and escaping | `npm test` | pass | `tests/message-format.test.mjs` |
 | AC12, AC13 | Honest limits, copy quality | `npm test`, `npm run lint:copy` | pass, clean | `tests/guidelines.test.mjs` |
-| AC14 | Live run in local n8n | `N8N_URL=... N8N_API_KEY=... npm run e2e` | 11 of 11 checks pass | `samples/e2e-run.txt` |
+| AC14 | Live run in local n8n | `N8N_URL=... N8N_API_KEY=... npm run e2e` | 12 of 12 checks pass, three runs in a row after review 2 | `samples/e2e-run.txt` |
 
-Unit tests: 66 run, 66 pass, 0 fail.
+Unit tests: 73 run, 73 pass, 0 fail (`npm test`, 27 Oct 2026, after review 2).
 
 ## What the live run exercised
 
@@ -38,3 +38,14 @@ Unit tests: 66 run, 66 pass, 0 fail.
 | The Telegram node added "This message was sent automatically with n8n" to every alert | The node was replaced by a mock in tests | `appendAttribution` set to false, test added |
 
 The screenshot is `screenshots/canvas.png`, taken from an unmodified import of `workflow.json`.
+
+## Review 2 e2e changes (27 Oct 2026)
+
+Developer session B (docs/REVIEW-2.md, "Review of commit 7db78ec") found G1: messages were counted by a time window, so two overlapping runs could not be told apart; and G2: a missing length guard before `r.sent[1]`. The PM applied:
+
+| Item | Change |
+|---|---|
+| G1 | the mock Bot API returns a unique `message_id`; a phase counts only messages whose id appears in its own execution's "Send alert to Telegram" output. Default tick raised from 6 s to 10 s; each phase logs its execution's duration |
+| G2 | `assert.ok(r.sent.length >= 2)` before reading the second alert |
+
+Runs after the change: 12/12, then 11/12, then 12/12. The 11/12 run failed "baseline: no keyword alerts, only the two channel-problem notices" with 0 messages: the first execution after activation started during the 1.5 s sleep at the start of each phase, so the phase awaited the second run, which correctly sent nothing. The sleep was removed (id matching makes it unnecessary). Three runs after that: 12/12, 12/12, 12/12 (`samples/e2e-run.txt` is the last).
