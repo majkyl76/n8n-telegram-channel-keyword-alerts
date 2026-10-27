@@ -73,6 +73,7 @@ const startMocks = () =>
     const preview = createServer((req, res) => {
       const name = decodeURIComponent(req.url.replace(/^\/s\//, '').split(/[/?]/)[0]);
       hits.preview.push({ name, ua: req.headers['user-agent'] });
+      if (name === 'dropped') { req.socket.destroy(); return; } // transport error, not an HTTP status
       const r = previewFor(name);
       res.writeHead(r.status, { 'content-type': 'text/html; charset=utf-8' });
       res.end(r.body);
@@ -235,7 +236,31 @@ async function main() {
     });
     r = await runPhase(w.id, 'cap');
     check('cap: next run repeats nothing', () => assert.equal(r.sent.length, 0));
+    // ---- a second copy where one channel drops the connection (real transport-error items) ----
+    await api(`/workflows/${w.id}/deactivate`, { method: 'POST', body: '{}' });
+    const wf2 = JSON.parse(readFileSync(process.env.WORKFLOW_FILE || join(root, 'workflow.json'), 'utf8'));
+    setAssign(wf2, 'channels', 'dropped\nalpha');
+    setAssign(wf2, 'keywords', 'kubernetes');
+    setAssign(wf2, 'telegramChatId', CHAT_ID);
+    setAssign(wf2, 'previewBaseUrl', mocks.previewBase);
+    setNode(wf2, 'Run every 15 minutes', (n) => { n.parameters.rule.interval = [{ field: 'seconds', secondsInterval: TICK_SECONDS }]; });
+    setNode(wf2, 'Send alert to Telegram', (n) => { n.credentials.telegramApi = { id: cred.id, name: cred.name }; });
+    const w2 = await api('/workflows', { method: 'POST', body: JSON.stringify({ name: 'e2e dropped ' + wf2.name, nodes: wf2.nodes, connections: wf2.connections, settings: wf2.settings }) });
+    created.workflow2 = w2.id;
+    await api(`/workflows/${w2.id}/activate`, { method: 'POST', body: '{}' });
+    phase = 'baseline';
+    r = await runPhase(w2.id, 'dropped-connection');
+    check('dropped connection: run still succeeds, the dead channel gets one notice, the good channel is still read', () => {
+      assert.equal(r.exec.status, 'success', JSON.stringify(r.exec.data?.resultData?.error ?? {}).slice(0, 300));
+      assert.deepEqual([...new Set(r.fetches.map((f) => f.name))].sort(), ['alpha', 'dropped']);
+      assert.equal(r.sent.length, 1, JSON.stringify(r.sent.map((m) => m.text)));
+      assert.match(r.sent[0].text, /dropped/);
+    });
   } finally {
+    if (created.workflow2) {
+      await api(`/workflows/${created.workflow2}/deactivate`, { method: 'POST', body: '{}' }).catch(() => {});
+      await api(`/workflows/${created.workflow2}`, { method: 'DELETE' }).catch(() => {});
+    }
     if (created.workflow) {
       await api(`/workflows/${created.workflow}/deactivate`, { method: 'POST', body: '{}' }).catch(() => {});
       await api(`/workflows/${created.workflow}`, { method: 'DELETE' }).catch(() => {});
