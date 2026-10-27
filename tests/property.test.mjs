@@ -57,11 +57,11 @@ test('property: a whole word always matches, an embedded one never does', () => 
   if (!built()) return;
   const rand = rng(SEED + 1);
   const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
-  // Keywords are also fuzzed over every character escapeRegex touches (review F1:
-  // a hyphen used to crash the regex compile). before/after stay plain letters, so
-  // gluing them straight onto the keyword always lands on a real word character and
-  // the "embedded must not match" assertion below stays meaningful regardless of
-  // what the keyword itself is made of.
+  // Keywords are also fuzzed over every character escapeRegex touches (regression:
+  // a hyphen in a keyword used to crash the regex compile). before/after stay plain
+  // letters, so gluing them straight onto the keyword always lands on a real word
+  // character and the "embedded must not match" assertion below stays meaningful
+  // regardless of what the keyword itself is made of.
   const kwAlphabet = letters.concat(['-', '.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\', '/']);
   const word = (alphabet) => {
     let w = '';
