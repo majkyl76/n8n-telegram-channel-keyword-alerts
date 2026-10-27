@@ -267,14 +267,15 @@ test('AC13: README, LISTING and sticky text pass copy lint', () => {
 });
 
 test('Code nodes avoid globals that the n8n Code node sandbox does not provide', () => {
-  // Found in a live run of the sibling template: `new URL(...)` threw "URL is not defined" inside n8n.
+  // The n8n Code node sandbox has no `new URL`, URLSearchParams, Buffer, structuredClone,
+  // TextEncoder or TextDecoder, unlike plain Node.js.
   const wf = JSON.parse(readFileSync(new URL('../workflow.json', import.meta.url), 'utf8'));
   for (const node of wf.nodes.filter((n) => n.type === 'n8n-nodes-base.code')) {
     assert.doesNotMatch(node.parameters.jsCode, /\b(new URL|URLSearchParams|Buffer|structuredClone|TextEncoder|TextDecoder)\b/, node.name);
   }
 });
 
-test('live-run findings: HTML node reads the HTTP body from "data", and the Telegram node drops the n8n attribution line', () => {
+test('HTML node reads the HTTP body from "data", and the Telegram node drops the n8n attribution line', () => {
   const wf = JSON.parse(readFileSync(new URL('../workflow.json', import.meta.url), 'utf8'));
   const html = wf.nodes.find((n) => n.name === 'Split page into post blocks');
   assert.equal(html.parameters.dataPropertyName, 'data');

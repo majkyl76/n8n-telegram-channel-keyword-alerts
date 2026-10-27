@@ -1,4 +1,4 @@
-// Regression tests for edge cases found during development (SPEC AC15..AC19).
+// Regression tests for parsing and formatting edge cases (AC15..AC19).
 // All behaviour is exercised through the shipped Code node's input and output.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
