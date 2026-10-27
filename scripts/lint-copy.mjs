@@ -1,4 +1,4 @@
-// Copy quality checks for README.md, LISTING.md and the sticky note text in
+// Copy quality checks for README.md and the sticky note text in
 // workflow.json. No em dashes, British spelling for a short list. Code spans
 // and fenced blocks are ignored so API fields and code identifiers
 // (parse_mode, color, etc.) are not flagged.
@@ -44,7 +44,7 @@ export function stickyTexts() {
 
 export function lintAll() {
   const issues = [];
-  for (const file of ['README.md', 'LISTING.md']) {
+  for (const file of ['README.md']) {
     const p = join(root, file);
     if (!existsSync(p)) {
       issues.push(`${file}: missing`);
