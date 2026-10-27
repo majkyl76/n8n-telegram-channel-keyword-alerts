@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { runCheckSettings, hasWorkflow } from './helpers.mjs';
 
 const base = {
-  channels: 'durov',
+  channels: 'examplechannel',
   keywords: 'n8n',
   excludeKeywords: '',
   matchWholeWords: true,
@@ -43,7 +43,7 @@ test('AC4: throws when there are no channels', () => {
 
 test('AC4: throws on an invalid channel username, naming the offending value', () => {
   if (skipUnbuilt()) return;
-  assert.throws(() => runCheckSettings(cfg({ channels: 'durov\n123bad' })), /123bad/);
+  assert.throws(() => runCheckSettings(cfg({ channels: 'examplechannel\n123bad' })), /123bad/);
   assert.throws(() => runCheckSettings(cfg({ channels: 'ab' })), /ab/); // too short
 });
 
@@ -59,32 +59,32 @@ test('AC4: normalises every accepted channel format', () => {
   const items = runCheckSettings(
     cfg({
       channels: [
-        'durov',
+        'examplechannel',
         '@telegram',
         't.me/n8nteam',
-        'https://t.me/durov_test',
+        'https://t.me/examplechannel_test',
         'https://t.me/s/some_channel',
-        'https://t.me/durov/531?embed=1',
+        'https://t.me/examplechannel/531?embed=1',
         'https://t.me/trailing/',
       ].join('\n'),
     }),
   );
   const slugs = items.map((i) => i.json.channel);
-  assert.deepEqual(slugs, ['durov', 'telegram', 'n8nteam', 'durov_test', 'some_channel', 'trailing']);
-  // /531 post suffix and ?query stripped, duplicate durov removed.
+  assert.deepEqual(slugs, ['examplechannel', 'telegram', 'n8nteam', 'examplechannel_test', 'some_channel', 'trailing']);
+  // /531 post suffix and ?query stripped, duplicate examplechannel removed.
 });
 
 test('AC4: de-duplicates channels case-insensitively, keeping the first', () => {
   if (skipUnbuilt()) return;
-  const items = runCheckSettings(cfg({ channels: 'Durov\ndurov\nDUROV\ntelegram' }));
-  assert.deepEqual(items.map((i) => i.json.channel), ['Durov', 'telegram']);
+  const items = runCheckSettings(cfg({ channels: 'Examplechannel\nexamplechannel\nEXAMPLECHANNEL\ntelegram' }));
+  assert.deepEqual(items.map((i) => i.json.channel), ['Examplechannel', 'telegram']);
 });
 
 test('AC4: emits one item per channel carrying the config and a fetch url', () => {
   if (skipUnbuilt()) return;
-  const items = runCheckSettings(cfg({ channels: 'durov\ntelegram', keywords: 'n8n\nremote' }));
+  const items = runCheckSettings(cfg({ channels: 'examplechannel\ntelegram', keywords: 'n8n\nremote' }));
   assert.equal(items.length, 2);
-  assert.equal(items[0].json.url, 'https://t.me/s/durov');
+  assert.equal(items[0].json.url, 'https://t.me/s/examplechannel');
   assert.deepEqual(items[0].json.keywords, ['n8n', 'remote']);
   assert.equal(items[0].json.chatId, '12345');
   assert.equal(items[0].json.matchWholeWords, true);
@@ -92,7 +92,7 @@ test('AC4: emits one item per channel carrying the config and a fetch url', () =
 
 test('AC4: ignores blank lines and # comments in channels and keywords', () => {
   if (skipUnbuilt()) return;
-  const items = runCheckSettings(cfg({ channels: '# channels\n\ndurov\n  \ntelegram', keywords: '# kw\nn8n\n\nremote' }));
-  assert.deepEqual(items.map((i) => i.json.channel), ['durov', 'telegram']);
+  const items = runCheckSettings(cfg({ channels: '# channels\n\nexamplechannel\n  \ntelegram', keywords: '# kw\nn8n\n\nremote' }));
+  assert.deepEqual(items.map((i) => i.json.channel), ['examplechannel', 'telegram']);
   assert.deepEqual(items[0].json.keywords, ['n8n', 'remote']);
 });

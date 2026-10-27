@@ -22,10 +22,10 @@ const alerts = (out) => out.filter((i) => i.json.kind === 'alert');
 
 test('AC9: a gap at the bottom of the page sets possibleGap and notes it', () => {
   if (!built()) return;
-  const channelItems = [channelConfig('durov', { keywords: ['telegram'], baselineOnFirstRun: false })];
-  const state = { lastSeen_durov: 100 };
+  const channelItems = [channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: false })];
+  const state = { lastSeen_examplechannel: 100 };
   // lowest id 105 > lastSeen+1 (101) -> gap
-  const inputItems = [post('durov', 105, 'telegram'), post('durov', 106, 'telegram')];
+  const inputItems = [post('examplechannel', 105, 'telegram'), post('examplechannel', 106, 'telegram')];
   const r = runFindNew({ inputItems, channelItems, staticData: state });
   const a = alerts(r.out);
   assert.ok(a.length > 0);
@@ -36,9 +36,9 @@ test('AC9: a gap at the bottom of the page sets possibleGap and notes it', () =>
 
 test('AC9: no gap when the page continues from the last seen post', () => {
   if (!built()) return;
-  const channelItems = [channelConfig('durov', { keywords: ['telegram'], baselineOnFirstRun: false })];
-  const state = { lastSeen_durov: 100 };
-  const inputItems = [post('durov', 101, 'telegram'), post('durov', 102, 'telegram')];
+  const channelItems = [channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: false })];
+  const state = { lastSeen_examplechannel: 100 };
+  const inputItems = [post('examplechannel', 101, 'telegram'), post('examplechannel', 102, 'telegram')];
   const r = runFindNew({ inputItems, channelItems, staticData: state });
   for (const a of alerts(r.out)) {
     assert.equal(a.json.possibleGap, false);
@@ -48,9 +48,9 @@ test('AC9: no gap when the page continues from the last seen post', () => {
 
 test('AC9: cap sends only the newest N matches plus a summary, and advances state', () => {
   if (!built()) return;
-  const channelItems = [channelConfig('durov', { keywords: ['telegram'], baselineOnFirstRun: false, maxAlertsPerRun: 3 })];
+  const channelItems = [channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: false, maxAlertsPerRun: 3 })];
   const inputItems = [];
-  for (let id = 1; id <= 7; id++) inputItems.push(post('durov', id, 'telegram ' + id));
+  for (let id = 1; id <= 7; id++) inputItems.push(post('examplechannel', id, 'telegram ' + id));
   const state = {};
   const r = runFindNew({ inputItems, channelItems, staticData: state });
   const a = alerts(r.out);
@@ -59,5 +59,5 @@ test('AC9: cap sends only the newest N matches plus a summary, and advances stat
   const summary = r.out.find((i) => i.json.kind === 'summary');
   assert.ok(summary, 'a summary message is sent');
   assert.match(summary.json.text, /\+4 more matching posts not shown/);
-  assert.equal(state.lastSeen_durov, 7, 'state advances past all matches');
+  assert.equal(state.lastSeen_examplechannel, 7, 'state advances past all matches');
 });

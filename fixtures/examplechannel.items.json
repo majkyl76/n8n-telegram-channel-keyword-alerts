@@ -1,0 +1,141 @@
+[
+  {
+    "postId": "examplechannel/531",
+    "text": "Telegram now has a redesigned sticker panel, live for everyone today. <tg-emoji emoji-id=\"1\"><i class=\"emoji\" style=\"background-image:url('//telegram.org/img/emoji/40/F09FA7A0.png')\"><b>🎉</b></i></tg-emoji> Try it from Settings.",
+    "isoDate": "2026-07-16T08:00:00+00:00",
+    "url": "https://t.me/examplechannel/531",
+    "views": "4.1K"
+  },
+  {
+    "postId": "examplechannel/532",
+    "text": "Telegram desktop now remembers your draft messages across devices.",
+    "isoDate": "2026-07-17T09:30:00+00:00",
+    "url": "https://t.me/examplechannel/532",
+    "views": "3.6K"
+  },
+  {
+    "postId": "examplechannel/533",
+    "text": "Telegram call quality has improved on slow connections. Full notes: <a href=\"https://example.org/changelog\">here</a>.",
+    "isoDate": "2026-07-18T10:15:00+00:00",
+    "url": "https://t.me/examplechannel/533",
+    "views": "5.2K"
+  },
+  {
+    "postId": "examplechannel/534",
+    "isoDate": "2026-07-19T11:00:00+00:00",
+    "url": "https://t.me/examplechannel/534",
+    "views": "2.9K"
+  },
+  {
+    "postId": "examplechannel/535",
+    "text": "We are testing a state-of-the-art translation feature in group chats this week.",
+    "isoDate": "2026-07-20T12:45:00+00:00",
+    "url": "https://t.me/examplechannel/535",
+    "views": "1.8K"
+  },
+  {
+    "postId": "examplechannel/536",
+    "text": "Breaking: a new privacy toolkit is rolling out across the platform this month.",
+    "isoDate": "2026-07-21T13:30:00+00:00",
+    "url": "https://t.me/examplechannel/536",
+    "views": "6.4K"
+  },
+  {
+    "postId": "examplechannel/537",
+    "text": "Voice messages on Telegram now show a waveform preview before you hit send.",
+    "isoDate": "2026-07-22T14:00:00+00:00",
+    "url": "https://t.me/examplechannel/537",
+    "views": "2.2K"
+  },
+  {
+    "postId": "examplechannel/538",
+    "text": "Apple briefly queried one of our apps in the App Store over a moderation dispute. Our <a href=\"https://example.org/safety\">moderation tools</a> resolved it within hours.",
+    "isoDate": "2026-07-23T15:20:00+00:00",
+    "url": "https://t.me/examplechannel/538",
+    "views": "7.9K"
+  },
+  {
+    "postId": "examplechannel/539",
+    "text": "Group admins can now pin up to ten messages at once.",
+    "isoDate": "2026-07-24T16:10:00+00:00",
+    "url": "https://t.me/examplechannel/539",
+    "views": "1.5K"
+  },
+  {
+    "postId": "examplechannel/540",
+    "text": "Reminder: today's community call starts at 18:00 UTC.",
+    "isoDate": "2026-07-25T17:05:00+00:00",
+    "url": "https://t.me/examplechannel/540",
+    "views": "1.1K"
+  },
+  {
+    "postId": "examplechannel/541",
+    "text": "A small fix shipped for a Telegram search bar glitch on mobile.",
+    "isoDate": "2026-07-26T08:40:00+00:00",
+    "url": "https://t.me/examplechannel/541",
+    "views": "2.0K"
+  },
+  {
+    "postId": "examplechannel/542",
+    "text": "New language pack: Welsh is now 100% translated by the community.",
+    "isoDate": "2026-07-27T09:50:00+00:00",
+    "url": "https://t.me/examplechannel/542",
+    "views": "1.3K"
+  },
+  {
+    "postId": "examplechannel/543",
+    "text": "We are rolling out faster media uploads for large video files.",
+    "isoDate": "2026-07-28T10:30:00+00:00",
+    "url": "https://t.me/examplechannel/543",
+    "views": "3.3K"
+  },
+  {
+    "postId": "examplechannel/544",
+    "text": "Polls in groups can now show results without ending the poll early.",
+    "isoDate": "2026-07-29T11:25:00+00:00",
+    "url": "https://t.me/examplechannel/544",
+    "views": "2.6K"
+  },
+  {
+    "postId": "examplechannel/545",
+    "text": "Telegram channel analytics now break down views by country.",
+    "isoDate": "2026-07-30T12:05:00+00:00",
+    "url": "https://t.me/examplechannel/545",
+    "views": "1.9K"
+  },
+  {
+    "postId": "examplechannel/546",
+    "text": "A new quick-reaction bar appears when you long-press a message.",
+    "isoDate": "2026-07-31T13:15:00+00:00",
+    "url": "https://t.me/examplechannel/546",
+    "views": "2.4K"
+  },
+  {
+    "postId": "examplechannel/547",
+    "text": "Our AI-assisted caption suggestions are now available for photo posts.",
+    "isoDate": "2026-08-01T14:50:00+00:00",
+    "url": "https://t.me/examplechannel/547",
+    "views": "5.5K"
+  },
+  {
+    "postId": "examplechannel/548",
+    "text": "Thanks to everyone who joined this month's Telegram meetup online.",
+    "isoDate": "2026-08-02T15:35:00+00:00",
+    "url": "https://t.me/examplechannel/548",
+    "views": "3.8K"
+  },
+  {
+    "postId": "examplechannel/549",
+    "text": "Bug fix: reactions sometimes failed to sync on slow networks.",
+    "isoDate": "2026-08-03T16:20:00+00:00",
+    "url": "https://t.me/examplechannel/549",
+    "views": "1.4K"
+  },
+  {
+    "postId": "examplechannel/550",
+    "text": "That's all for this batch of updates. See you next week.",
+    "isoDate": "2026-08-04T17:00:00+00:00",
+    "url": "https://t.me/examplechannel/550",
+    "views": "2.1K"
+  }
+]

@@ -35,11 +35,11 @@ test('AC10: a channel with no posts produces one notice, then stays quiet', () =
 
 test('AC10: recovery sends no message and clears the flag', () => {
   if (!built()) return;
-  const channelItems = [channelConfig('durov', { keywords: ['telegram'], baselineOnFirstRun: false })];
-  const state = { problem_durov: true };
-  const r = runFindNew({ inputItems: [post('durov', 1, 'telegram')], channelItems, staticData: state });
+  const channelItems = [channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: false })];
+  const state = { problem_examplechannel: true };
+  const r = runFindNew({ inputItems: [post('examplechannel', 1, 'telegram')], channelItems, staticData: state });
   assert.equal(notices(r.out).length, 0, 'no message on recovery');
-  assert.ok(!('problem_durov' in state), 'problem flag cleared');
+  assert.ok(!('problem_examplechannel' in state), 'problem flag cleared');
 });
 
 test('AC10: none.html (zero post blocks) is treated as a channel problem', () => {
@@ -55,10 +55,10 @@ test('AC10: one bad channel does not stop the others', () => {
   if (!built()) return;
   const channelItems = [
     channelConfig('ghost', { keywords: ['telegram'], baselineOnFirstRun: false }),
-    channelConfig('durov', { keywords: ['telegram'], baselineOnFirstRun: false }),
+    channelConfig('examplechannel', { keywords: ['telegram'], baselineOnFirstRun: false }),
   ];
-  const inputItems = [post('durov', 1, 'telegram here')];
+  const inputItems = [post('examplechannel', 1, 'telegram here')];
   const r = runFindNew({ inputItems, channelItems, staticData: {} });
   assert.equal(notices(r.out).length, 1, 'ghost gets a notice');
-  assert.equal(r.out.filter((i) => i.json.kind === 'alert').length, 1, 'durov still alerts');
+  assert.equal(r.out.filter((i) => i.json.kind === 'alert').length, 1, 'examplechannel still alerts');
 });

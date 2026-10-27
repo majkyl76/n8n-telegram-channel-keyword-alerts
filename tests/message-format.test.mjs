@@ -13,16 +13,16 @@ function built() {
 test('AC11: message shape has bold @channel, UTC date, snippet, Matched and a link', () => {
   if (!built()) return;
   const a = alertFor({
-    channel: 'durov',
+    channel: 'examplechannel',
     postId: 531,
     isoDate: '2026-07-16T20:45:25+00:00',
     text: 'n8n Rich Text Editor is here',
     keywords: ['n8n', 'editor'],
   });
-  assert.match(a.text, /^<b>@durov<\/b>/m);
+  assert.match(a.text, /^<b>@examplechannel<\/b>/m);
   assert.match(a.text, /2026-07-16 20:45 UTC/);
   assert.match(a.text, /Matched: n8n, editor/);
-  assert.match(a.text, /<a href="https:\/\/t\.me\/durov\/531">Open post<\/a>/);
+  assert.match(a.text, /<a href="https:\/\/t\.me\/examplechannel\/531">Open post<\/a>/);
 });
 
 test('AC11: the date is formatted as YYYY-MM-DD HH:mm UTC', () => {
@@ -55,7 +55,7 @@ test('AC11: snippet is at most 500 chars, cut at a word boundary with an ellipsi
 test('AC11: the gap note is appended when possibleGap is set', () => {
   if (!built()) return;
   // A lastSeen far below the post id makes the run flag a possible gap.
-  const a = alertFor({ channel: 'durov', postId: 531, text: 'match', keywords: ['match'], staticData: { lastSeen_durov: 1 } });
+  const a = alertFor({ channel: 'examplechannel', postId: 531, text: 'match', keywords: ['match'], staticData: { lastSeen_examplechannel: 1 } });
   assert.equal(a.possibleGap, true);
   assert.match(a.text, /some posts may have been missed/i);
 });
@@ -63,6 +63,6 @@ test('AC11: the gap note is appended when possibleGap is set', () => {
 test('AC11: message stays under 4096 characters for hostile input', () => {
   if (!built()) return;
   const hostile = '&<>'.repeat(5000) + ' hostilematch';
-  const a = alertFor({ channel: 'durov', postId: 531, text: hostile, keywords: ['hostilematch'], staticData: { lastSeen_durov: 1 } });
+  const a = alertFor({ channel: 'examplechannel', postId: 531, text: hostile, keywords: ['hostilematch'], staticData: { lastSeen_examplechannel: 1 } });
   assert.ok(a.text.length < 4096, 'length ' + a.text.length);
 });

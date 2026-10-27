@@ -11,8 +11,11 @@
 // which is exactly what the HTML node returns for returnValue "html".
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
-const require = createRequire('/workspace/n8n-local/node_modules/');
+const scriptsDir = dirname(fileURLToPath(import.meta.url));
+const require = createRequire(join(scriptsDir, '..', '..', '..', 'n8n-local', 'node_modules') + '/');
 const cheerio = require('cheerio');
 
 // Per-post extraction map, identical to the second HTML node's extractionValues.
@@ -56,5 +59,5 @@ function run(srcName, outName) {
   console.log(`${srcName}: ${items.length} post items -> fixtures/${outName}`);
 }
 
-run('durov.html', 'durov.items.json');
+run('examplechannel.html', 'examplechannel.items.json');
 run('none.html', 'none.items.json');

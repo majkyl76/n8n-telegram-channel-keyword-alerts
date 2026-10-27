@@ -2,8 +2,8 @@
 //
 //   N8N_URL=http://127.0.0.1:5678 N8N_API_KEY=... node scripts/e2e.mjs
 //
-// It starts two mock servers: one serves channel preview pages built from the real
-// captured page in fixtures/durov.html, the other stands in for the Telegram Bot API.
+// It starts two mock servers: one serves channel preview pages built from the
+// fixture page in fixtures/examplechannel.html, the other stands in for the Telegram Bot API.
 // It imports workflow.json through the public REST API, creates a Telegram
 // credential whose base URL is the mock Bot API, patches ONLY the config node values
 // and the trigger interval in the imported copy, activates the workflow and asserts
@@ -21,12 +21,12 @@ if (!N8N_URL || !N8N_API_KEY) {
   process.exit(0);
 }
 // 10 s, not 6: a run with a dropped connection retries and takes about 5 s, so a 6 s tick
-// left no margin and runs of the same workflow could overlap (REVIEW-2 G1).
+// left no margin and runs of the same workflow could overlap.
 const TICK_SECONDS = Number(process.env.TICK_SECONDS || 10);
 const CHAT_ID = '424242';
 
-// ---------- preview pages from the real fixture ----------
-const real = readFileSync(join(root, 'fixtures/durov.html'), 'utf8');
+// ---------- preview pages from the fixture ----------
+const real = readFileSync(join(root, 'fixtures/examplechannel.html'), 'utf8');
 const WRAP = '<div class="tgme_widget_message_wrap js-widget_message_wrap">';
 const parts = real.split(WRAP);
 const head = parts[0];
@@ -38,8 +38,8 @@ const TEXT_RE = /(<div class="tgme_widget_message_text js-message_text"[^>]*>)([
 
 function retarget(block, channel, id, textHtml) {
   let b = block
-    .replace(/data-post="durov\/\d+"/, `data-post="${channel}/${id}"`)
-    .replace(/href="https:\/\/t\.me\/durov\/\d+"/g, `href="https://t.me/${channel}/${id}"`);
+    .replace(/data-post="examplechannel\/\d+"/, `data-post="${channel}/${id}"`)
+    .replace(/href="https:\/\/t\.me\/examplechannel\/\d+"/g, `href="https://t.me/${channel}/${id}"`);
   if (textHtml === null) b = b.replace(TEXT_RE, ''); // media-only post
   else if (textHtml !== undefined) b = b.replace(TEXT_RE, (_, o, _t, c) => o + textHtml + c);
   return b;
@@ -147,7 +147,7 @@ async function runPhase(workflowId, name) {
   const from = new Date(exec.startedAt).getTime() - 50;
   const to = new Date(exec.stoppedAt).getTime() + 500;
   // Messages are tied to this execution by the message_id the mock returned to its
-  // Telegram node, so a run that overlaps in time cannot add or take messages (REVIEW-2 G1).
+  // Telegram node, so a run that overlaps in time cannot add or take messages.
   const ids = new Set(outOf(exec, 'Send alert to Telegram').flat().map((j) => j?.message_id ?? j?.result?.message_id).filter((x) => x != null));
   const mine = sentLog.filter((e) => ids.has(e.id)).map((e) => e.msg);
   const inWindow = sentLog.filter((e) => e.ts >= from && e.ts <= to).length;
@@ -222,7 +222,7 @@ async function main() {
       for (const id of [554, 555, 557]) assert.ok(!all.includes(`alpha/${id}`), `post ${id} alerted`);
     });
     check('newposts: message format (HTML parse mode, escaping, matched keywords, link)', () => {
-      assert.ok(r.sent.length >= 2, 'expected two alerts, got ' + r.sent.length); // REVIEW-2 G2
+      assert.ok(r.sent.length >= 2, 'expected two alerts, got ' + r.sent.length);
       const m = r.sent[1];
       assert.equal(m.parse_mode, 'HTML');
       assert.match(m.text, /Matched: .*(remote|żółć)/i);

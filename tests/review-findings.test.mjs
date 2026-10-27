@@ -1,4 +1,4 @@
-// Regression tests for the independent review findings (SPEC AC15..AC19).
+// Regression tests for edge cases found during development (SPEC AC15..AC19).
 // All behaviour is exercised through the shipped Code node's input and output.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { root, loadWorkflow, runOne, alertFor, runFindNew, channelConfig, runCheckSettings, hasWorkflow } from './helpers.mjs';
 
 const BASE_SETTINGS = {
-  channels: 'durov',
+  channels: 'examplechannel',
   keywords: 'n8n',
   excludeKeywords: '',
   matchWholeWords: true,
@@ -44,23 +44,23 @@ test('AC15: message stays under 4096 with a 5000-char link and 300 matched keywo
 test('AC15: a very long matched-keyword list alone is cut, message stays bounded', () => {
   if (!built()) return;
   const keywords = Array.from({ length: 300 }, (_, i) => 'longkw' + String(i).padStart(3, '0'));
-  const a = alertFor({ channel: 'durov', postId: 10, text: keywords.join(' '), keywords });
+  const a = alertFor({ channel: 'examplechannel', postId: 10, text: keywords.join(' '), keywords });
   assert.ok(a.text.length < 4096, 'message length ' + a.text.length);
   assert.match(a.text, /Matched: /);
-  assert.match(a.text, /<a href="https:\/\/t\.me\/durov\/10">Open post<\/a>\s*$/);
+  assert.match(a.text, /<a href="https:\/\/t\.me\/examplechannel\/10">Open post<\/a>\s*$/);
 });
 
 test('AC16: the post link is built from the channel and id, not the page href', () => {
   if (!built()) return;
   const a = alertFor({
-    channel: 'durov',
+    channel: 'examplechannel',
     postId: 531,
     url: 'https://evil.example/pwn?x="><script>alert(1)</script>',
     text: 'match',
     keywords: ['match'],
   });
-  assert.equal(a.url, 'https://t.me/durov/531', 'url derived from channel + id');
-  assert.match(a.text, /<a href="https:\/\/t\.me\/durov\/531">Open post<\/a>/);
+  assert.equal(a.url, 'https://t.me/examplechannel/531', 'url derived from channel + id');
+  assert.match(a.text, /<a href="https:\/\/t\.me\/examplechannel\/531">Open post<\/a>/);
   assert.ok(!a.text.includes('evil.example'), 'hostile href must not reach the message');
 });
 
@@ -89,7 +89,7 @@ test('AC19: an error/empty item is treated as a channel with no posts, not a cra
   // not throw and must treat the channel as having returned nothing.
   const out = runFindNew({
     inputItems: [{}],
-    channelItems: [channelConfig('durov', { keywords: ['x'], baselineOnFirstRun: false })],
+    channelItems: [channelConfig('examplechannel', { keywords: ['x'], baselineOnFirstRun: false })],
     staticData: {},
   }).out.map((i) => i.json);
   assert.equal(out.filter((j) => j.kind === 'alert').length, 0);
@@ -99,35 +99,35 @@ test('AC19: an error/empty item is treated as a channel with no posts, not a cra
 test('AC19: one dead item does not stop a healthy channel in the same run', () => {
   if (!built()) return;
   const out = runFindNew({
-    inputItems: [{}, { postId: 'durov/5', text: 'match here', isoDate: '2026-07-16T20:45:25+00:00', views: '1K' }],
+    inputItems: [{}, { postId: 'examplechannel/5', text: 'match here', isoDate: '2026-07-16T20:45:25+00:00', views: '1K' }],
     channelItems: [
       channelConfig('ghost', { keywords: ['match'], baselineOnFirstRun: false }),
-      channelConfig('durov', { keywords: ['match'], baselineOnFirstRun: false }),
+      channelConfig('examplechannel', { keywords: ['match'], baselineOnFirstRun: false }),
     ],
     staticData: {},
   }).out.map((i) => i.json);
   assert.equal(out.filter((j) => j.kind === 'notice').length, 1, 'ghost gets one notice');
-  assert.equal(out.filter((j) => j.kind === 'alert').length, 1, 'durov still alerts');
+  assert.equal(out.filter((j) => j.kind === 'alert').length, 1, 'examplechannel still alerts');
 });
 
 test('AC9: two post blocks with the same data-post id on one page produce only one alert', () => {
   if (!built()) return;
   const inputItems = [
-    { postId: 'durov/5', text: 'first match', isoDate: '2026-07-16T20:45:25+00:00', url: 'https://t.me/durov/5', views: '1K' },
-    { postId: 'durov/5', text: 'second match', isoDate: '2026-07-16T20:46:25+00:00', url: 'https://t.me/durov/5', views: '2K' },
-    { postId: 'durov/9', text: 'no keyword here', isoDate: '2026-07-16T20:47:25+00:00', url: 'https://t.me/durov/9', views: '3K' },
+    { postId: 'examplechannel/5', text: 'first match', isoDate: '2026-07-16T20:45:25+00:00', url: 'https://t.me/examplechannel/5', views: '1K' },
+    { postId: 'examplechannel/5', text: 'second match', isoDate: '2026-07-16T20:46:25+00:00', url: 'https://t.me/examplechannel/5', views: '2K' },
+    { postId: 'examplechannel/9', text: 'no keyword here', isoDate: '2026-07-16T20:47:25+00:00', url: 'https://t.me/examplechannel/9', views: '3K' },
   ];
   const staticData = {};
   const out = runFindNew({
     inputItems,
-    channelItems: [channelConfig('durov', { keywords: ['match'], baselineOnFirstRun: false })],
+    channelItems: [channelConfig('examplechannel', { keywords: ['match'], baselineOnFirstRun: false })],
     staticData,
   }).out.map((i) => i.json);
   const alerts = out.filter((j) => j.kind === 'alert');
   assert.equal(alerts.length, 1, 'the duplicate post id should alert only once, got ' + alerts.length);
   assert.equal(alerts[0].postId, 5);
   assert.ok(alerts[0].snippet.includes('first'), 'the first occurrence on the page is kept');
-  assert.equal(staticData.lastSeen_durov, 9, 'state still advances to the highest id seen on the page');
+  assert.equal(staticData.lastSeen_examplechannel, 9, 'state still advances to the highest id seen on the page');
 });
 
 test('AC4: rejects maxAlertsPerRun given as the boolean true', () => {
@@ -150,7 +150,7 @@ test('AC6: emoji alt attribute is captured when it comes before class', () => {
   assert.ok(!a.snippet.includes('<'), 'no leftover tag markup');
 });
 
-// --- Final independent review: F1 (blocker), F2, F3 regressions ------------
+// --- Surrogate-pair and truncation edge cases -------------------------------
 
 function hasLoneSurrogate(s) {
   for (let i = 0; i < s.length; i++) {
@@ -244,10 +244,10 @@ test('AC9: a string lastSeen is coerced to a number so a real gap is still flagg
   if (!built()) return;
   const out = runFindNew({
     inputItems: [
-      { postId: 'durov/10', text: 'match here', isoDate: '2026-07-16T20:45:25+00:00', url: 'https://t.me/durov/10', views: '1K' },
+      { postId: 'examplechannel/10', text: 'match here', isoDate: '2026-07-16T20:45:25+00:00', url: 'https://t.me/examplechannel/10', views: '1K' },
     ],
-    channelItems: [channelConfig('durov', { keywords: ['match'], baselineOnFirstRun: false })],
-    staticData: { lastSeen_durov: '5' },
+    channelItems: [channelConfig('examplechannel', { keywords: ['match'], baselineOnFirstRun: false })],
+    staticData: { lastSeen_examplechannel: '5' },
   }).out.map((i) => i.json);
   const alert = out.find((j) => j.kind === 'alert');
   assert.ok(alert, 'post 10 should alert, as it is greater than the stored lastSeen of 5');

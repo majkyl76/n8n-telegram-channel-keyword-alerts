@@ -1,0 +1,89 @@
+[
+  {
+    "send": true,
+    "kind": "alert",
+    "channel": "examplechannel",
+    "chatId": "12345",
+    "postId": 537,
+    "url": "https://t.me/examplechannel/537",
+    "isoDate": "2026-07-22T14:00:00+00:00",
+    "views": "2.2K",
+    "snippet": "Voice messages on Telegram now show a waveform preview before you hit send.",
+    "matchedKeywords": [
+      "Telegram"
+    ],
+    "possibleGap": false,
+    "text": "<b>@examplechannel</b>\n2026-07-22 14:00 UTC\n\nVoice messages on Telegram now show a waveform preview before you hit send.\n\nMatched: Telegram\n<a href=\"https://t.me/examplechannel/537\">Open post</a>"
+  },
+  {
+    "send": true,
+    "kind": "alert",
+    "channel": "examplechannel",
+    "chatId": "12345",
+    "postId": 541,
+    "url": "https://t.me/examplechannel/541",
+    "isoDate": "2026-07-26T08:40:00+00:00",
+    "views": "2.0K",
+    "snippet": "A small fix shipped for a Telegram search bar glitch on mobile.",
+    "matchedKeywords": [
+      "Telegram"
+    ],
+    "possibleGap": false,
+    "text": "<b>@examplechannel</b>\n2026-07-26 08:40 UTC\n\nA small fix shipped for a Telegram search bar glitch on mobile.\n\nMatched: Telegram\n<a href=\"https://t.me/examplechannel/541\">Open post</a>"
+  },
+  {
+    "send": true,
+    "kind": "alert",
+    "channel": "examplechannel",
+    "chatId": "12345",
+    "postId": 545,
+    "url": "https://t.me/examplechannel/545",
+    "isoDate": "2026-07-30T12:05:00+00:00",
+    "views": "1.9K",
+    "snippet": "Telegram channel analytics now break down views by country.",
+    "matchedKeywords": [
+      "Telegram"
+    ],
+    "possibleGap": false,
+    "text": "<b>@examplechannel</b>\n2026-07-30 12:05 UTC\n\nTelegram channel analytics now break down views by country.\n\nMatched: Telegram\n<a href=\"https://t.me/examplechannel/545\">Open post</a>"
+  },
+  {
+    "send": true,
+    "kind": "alert",
+    "channel": "examplechannel",
+    "chatId": "12345",
+    "postId": 547,
+    "url": "https://t.me/examplechannel/547",
+    "isoDate": "2026-08-01T14:50:00+00:00",
+    "views": "5.5K",
+    "snippet": "Our AI-assisted caption suggestions are now available for photo posts.",
+    "matchedKeywords": [
+      "AI"
+    ],
+    "possibleGap": false,
+    "text": "<b>@examplechannel</b>\n2026-08-01 14:50 UTC\n\nOur AI-assisted caption suggestions are now available for photo posts.\n\nMatched: AI\n<a href=\"https://t.me/examplechannel/547\">Open post</a>"
+  },
+  {
+    "send": true,
+    "kind": "alert",
+    "channel": "examplechannel",
+    "chatId": "12345",
+    "postId": 548,
+    "url": "https://t.me/examplechannel/548",
+    "isoDate": "2026-08-02T15:35:00+00:00",
+    "views": "3.8K",
+    "snippet": "Thanks to everyone who joined this month's Telegram meetup online.",
+    "matchedKeywords": [
+      "Telegram"
+    ],
+    "possibleGap": false,
+    "text": "<b>@examplechannel</b>\n2026-08-02 15:35 UTC\n\nThanks to everyone who joined this month's Telegram meetup online.\n\nMatched: Telegram\n<a href=\"https://t.me/examplechannel/548\">Open post</a>"
+  },
+  {
+    "send": true,
+    "kind": "summary",
+    "channel": "examplechannel",
+    "chatId": "12345",
+    "text": "+3 more matching posts not shown"
+  }
+]

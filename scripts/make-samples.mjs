@@ -8,12 +8,12 @@ import {
   root, fixture, runFindNew, channelConfig, runGolden, GOLDEN_CONFIG,
 } from '../tests/helpers.mjs';
 
-// 1. Parsed posts: run the durov fixture with no cap and no baseline so every
+// 1. Parsed posts: run the example fixture with no cap and no baseline so every
 //    keyword match surfaces as an alert carrying the parsed fields. (Media-only
 //    posts have no text and no keyword match, so they do not appear here.)
 const parsedOut = runFindNew({
-  inputItems: fixture('durov.items.json'),
-  channelItems: [channelConfig('durov', { keywords: GOLDEN_CONFIG.keywords, baselineOnFirstRun: false, maxAlertsPerRun: 100 })],
+  inputItems: fixture('examplechannel.items.json'),
+  channelItems: [channelConfig('examplechannel', { keywords: GOLDEN_CONFIG.keywords, baselineOnFirstRun: false, maxAlertsPerRun: 100 })],
   staticData: {},
 }).out.map((i) => i.json);
 const parsed = parsedOut
@@ -31,7 +31,7 @@ writeFileSync(join(root, 'samples', 'parsed-posts.json'), JSON.stringify(parsed,
 
 // 2. Golden alert output (also the golden-test fixture).
 const golden = runGolden().map((i) => i.json);
-writeFileSync(join(root, 'tests', 'golden', 'durov-alerts.json'), JSON.stringify(golden, null, 2) + '\n');
+writeFileSync(join(root, 'tests', 'golden', 'examplechannel-alerts.json'), JSON.stringify(golden, null, 2) + '\n');
 
 // 3. A single alert message as Telegram would receive it (HTML parse mode).
 const firstAlert = golden.find((i) => i.kind === 'alert');
