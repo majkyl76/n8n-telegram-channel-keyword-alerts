@@ -38,7 +38,13 @@ function htmlToText(html) {
   let s = String(html == null ? '' : html);
   // Emoji images with no inner text but an alt: keep the alt. (Fixtures carry the
   // emoji as inner text inside <b>, which survives tag stripping on its own.)
-  s = s.replace(/<i\b[^>]*class="emoji"[^>]*\balt="([^"]*)"[^>]*>\s*<\/i>/gi, '$1');
+  // class="emoji" and alt="..." can appear in either order, so check the whole
+  // attribute string rather than anchoring on which comes first.
+  s = s.replace(/<i\b([^>]*)>\s*<\/i>/gi, (whole, attrs) => {
+    if (!/class="emoji"/i.test(attrs)) return whole;
+    const alt = attrs.match(/\balt="([^"]*)"/i);
+    return alt ? alt[1] : whole;
+  });
   // <br> and block ends become newlines.
   s = s.replace(/<br\s*\/?>/gi, '\n');
   s = s.replace(/<\/(p|div|blockquote)>/gi, '\n');
@@ -204,11 +210,17 @@ function main() {
   const baselineOnFirstRun = cfg.baselineOnFirstRun !== false;
   const chatId = cfg.chatId;
 
-  // Group the parsed posts by channel.
+  // Group the parsed posts by channel, de-duplicating by post id (AC9: the same
+  // post can appear twice in one page's blocks; keep the first occurrence so it
+  // alerts once, but the id itself still counts for the highest-seen state).
   const byChannel = {};
+  const seenPostIds = {};
   for (const item of $input.all()) {
     const post = parsePost(item.json);
     if (!post.channel || !Number.isFinite(post.postId)) continue;
+    const seen = (seenPostIds[post.channelKey] = seenPostIds[post.channelKey] || new Set());
+    if (seen.has(post.postId)) continue;
+    seen.add(post.postId);
     (byChannel[post.channelKey] = byChannel[post.channelKey] || []).push(post);
   }
 
