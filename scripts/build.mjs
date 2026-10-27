@@ -109,7 +109,7 @@ const nodes = [
     parameters: {
       operation: 'extractHtmlContent',
       sourceData: 'json',
-      dataPropertyName: 'body',
+      dataPropertyName: 'data',
       extractionValues: {
         values: [
           {
@@ -122,6 +122,7 @@ const nodes = [
       },
       options: {},
     },
+    onError: 'continueRegularOutput',
   },
   {
     id: 'node-splitout',
@@ -194,7 +195,7 @@ const nodes = [
       operation: 'sendMessage',
       chatId: '={{ $json.chatId }}',
       text: '={{ $json.text }}',
-      additionalFields: { parse_mode: 'HTML', disable_web_page_preview: true },
+      additionalFields: { parse_mode: 'HTML', disable_web_page_preview: true, appendAttribution: false },
     },
     credentials: { telegramApi: { name: 'Telegram Bot account' } },
     retryOnFail: true,
