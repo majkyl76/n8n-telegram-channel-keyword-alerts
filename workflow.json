@@ -166,7 +166,7 @@
       "parameters": {
         "operation": "extractHtmlContent",
         "sourceData": "json",
-        "dataPropertyName": "body",
+        "dataPropertyName": "data",
         "extractionValues": {
           "values": [
             {
@@ -178,7 +178,8 @@
           ]
         },
         "options": {}
-      }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "id": "node-splitout",
@@ -307,7 +308,8 @@
         "text": "={{ $json.text }}",
         "additionalFields": {
           "parse_mode": "HTML",
-          "disable_web_page_preview": true
+          "disable_web_page_preview": true,
+          "appendAttribution": false
         }
       },
       "credentials": {
