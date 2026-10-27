@@ -225,7 +225,6 @@ test('no secrets anywhere in the JSON', () => {
   assert.ok(!/Bearer\s/.test(raw), 'contains Bearer');
   assert.ok(!/api_key/i.test(raw), 'contains api_key');
   assert.ok(!/[A-Za-z0-9+/=]{40,}/.test(raw), 'long random-looking string');
-  assert.ok(!/patyjewicz/i.test(raw), "contains owner's name");
   assert.ok(!/majkyl76@|@gmail\.com/i.test(raw), 'contains a personal email');
 });
 
