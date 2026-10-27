@@ -119,20 +119,42 @@ function cutSnippet(text, max) {
 const GAP_NOTE =
   'Note: some posts may have been missed. The public preview shows only the latest posts, so run this workflow more often.';
 
+// Cap an already-escaped string to a hard length, adding an ellipsis. Clipping
+// after escaping bounds the output even if escaping expanded the input (e.g. a
+// run of & < >); it may clip inside an entity but never inside a tag.
+function clip(s, max) {
+  return s.length <= max ? s : s.slice(0, max) + '…';
+}
+const HEADER_MAX = 100; // characters of channel name shown in the header
+const MATCHED_MAX = 300; // characters of the "Matched: ..." list
+const URL_MAX = 600; // characters of the link target
+
 function buildAlertText(channel, post, matched, possibleGap) {
-  const header = '<b>@' + escapeHtml(channel) + '</b>';
+  // AC15: cap the header, matched list and link so the message stays under the
+  // Telegram limit even for a very long channel name, link or keyword list.
+  const header = '<b>@' + clip(escapeHtml(channel), HEADER_MAX) + '</b>';
   const date = formatUtc(post.isoDate);
-  const matchedLine = 'Matched: ' + escapeHtml(matched.join(', '));
-  const link = '<a href="' + escapeHtml(post.url) + '">Open post</a>';
+  const matchedLine = 'Matched: ' + clip(escapeHtml(matched.join(', ')), MATCHED_MAX);
+  const link = '<a href="' + clip(escapeHtml(post.url), URL_MAX) + '">Open post</a>';
+  const build = (snippet) => {
+    const parts = [header, date, '', snippet, '', matchedLine, link];
+    if (possibleGap) parts.push('', GAP_NOTE);
+    return parts.join('\n');
+  };
   // Shrink the snippet, never the structure, until the escaped message fits.
   let budget = SNIPPET_MAX;
   let text;
   do {
-    const parts = [header, date, '', escapeHtml(cutSnippet(post.text, budget)), '', matchedLine, link];
-    if (possibleGap) parts.push('', GAP_NOTE);
-    text = parts.join('\n');
+    text = build(escapeHtml(cutSnippet(post.text, budget)));
     budget -= 100;
   } while (text.length >= MAX_MESSAGE && budget > 0);
+  // Belt and braces: if the capped fixed parts alone still overflow, drop the
+  // snippet entirely. The link line is kept last and is never cut mid-tag.
+  if (text.length >= MAX_MESSAGE) {
+    const parts = [header, date, matchedLine, link];
+    if (possibleGap) parts.push('', GAP_NOTE);
+    text = parts.join('\n');
+  }
   return text;
 }
 
@@ -156,7 +178,9 @@ function parsePost(raw) {
   const slash = dataPost.lastIndexOf('/');
   const channel = slash >= 0 ? dataPost.slice(0, slash) : '';
   const postId = parseInt(dataPost.slice(slash + 1), 10);
-  const url = String(raw.url || '').trim() || (channel ? 'https://t.me/' + channel + '/' + postId : '');
+  // AC16: build the permalink from the validated channel and numeric id, never
+  // from the page href (which is attacker-controllable). raw.url is ignored.
+  const url = channel && Number.isFinite(postId) ? 'https://t.me/' + channel + '/' + postId : '';
   return {
     channel,
     channelKey: channel.toLowerCase(),
@@ -287,24 +311,6 @@ function main() {
   }
 
   return out;
-}
-
-// Test seam: expose the pure helpers when a test provides $testExpose.
-// In n8n this global never exists, so the node always returns main().
-// `typeof` on an undeclared name is safe and does not throw.
-if (typeof $testExpose !== 'undefined') {
-  return {
-    htmlToText,
-    decodeEntities,
-    matchKeywords,
-    keywordRegex,
-    escapeHtml,
-    formatUtc,
-    cutSnippet,
-    buildAlertText,
-    parsePost,
-    main,
-  };
 }
 
 return main();
