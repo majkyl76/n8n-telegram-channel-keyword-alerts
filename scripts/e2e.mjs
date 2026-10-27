@@ -68,11 +68,12 @@ function previewFor(channel) {
   return { status: 200, body: page([...posts.cap]) }; // cap (gap: 558, 559 missing)
 }
 const sent = [];
+const sentLog = []; // every message with its arrival time, so a phase only counts its own execution
 const startMocks = () =>
   new Promise((resolve) => {
     const preview = createServer((req, res) => {
       const name = decodeURIComponent(req.url.replace(/^\/s\//, '').split(/[/?]/)[0]);
-      hits.preview.push({ name, ua: req.headers['user-agent'] });
+      hits.preview.push({ name, ua: req.headers['user-agent'], ts: Date.now() });
       if (name === 'dropped') { req.socket.destroy(); return; } // transport error, not an HTTP status
       const r = previewFor(name);
       res.writeHead(r.status, { 'content-type': 'text/html; charset=utf-8' });
@@ -85,7 +86,7 @@ const startMocks = () =>
         let parsed = body;
         try { parsed = JSON.parse(body); } catch {}
         hits.bot.push({ url: req.url, body: parsed });
-        if (req.url.endsWith('/sendMessage')) sent.push(parsed);
+        if (req.url.endsWith('/sendMessage')) { sent.push(parsed); sentLog.push({ ts: Date.now(), msg: parsed }); }
         res.writeHead(200, { 'content-type': 'application/json' });
         res.end(JSON.stringify({ ok: true, result: { message_id: sent.length, chat: { id: 1 }, date: 1, text: 'ok' } }));
       });
@@ -135,14 +136,17 @@ const outOf = (exec, node) => (exec.data?.resultData?.runData?.[node]?.[0]?.data
 async function runPhase(workflowId, name) {
   await sleep(1500); // let any in-flight execution drain
   phase = name;
-  sent.length = 0;
-  hits.preview.length = 0;
   const T = Date.now();
   const exec = await waitForRun(workflowId, T);
   await sleep(300);
-  console.log(`-- phase ${name}: execution ${exec.id} status=${exec.status}, messages sent=${sent.length}, preview fetches=${hits.preview.map((h) => h.name).join(',')}`);
+  // Count only what arrived during this execution, so a straggler from the previous run cannot leak in.
+  const from = new Date(exec.startedAt).getTime() - 50;
+  const to = new Date(exec.stoppedAt).getTime() + 500;
+  const mine = sentLog.filter((e) => e.ts >= from && e.ts <= to).map((e) => e.msg);
+  const fetched = hits.preview.filter((h) => h.ts >= from && h.ts <= to);
+  console.log(`-- phase ${name}: execution ${exec.id} status=${exec.status}, messages sent=${mine.length}, preview fetches=${fetched.map((h) => h.name).join(',')}`);
   if (exec.status !== 'success') console.log('   execution error:', JSON.stringify(exec.data?.resultData?.error ?? {}, null, 1).slice(0, 1200), 'lastNode=', exec.data?.resultData?.lastNodeExecuted);
-  return { exec, sent: [...sent], fetches: [...hits.preview] };
+  return { exec, sent: mine, fetches: fetched };
 }
 
 async function main() {
@@ -204,6 +208,7 @@ async function main() {
       assert.match(texts[1], /alpha\/556/);
     });
     check('newposts: excluded (557), irrelevant (555) and media-only (554) posts are silent', () => {
+      assert.equal(r.sent.length, 2, 'expected exactly the two alerts');
       const all = r.sent.map((m) => m.text).join('\n');
       for (const id of [554, 555, 557]) assert.ok(!all.includes(`alpha/${id}`), `post ${id} alerted`);
     });
@@ -232,6 +237,7 @@ async function main() {
       assert.match(texts[9], /alpha\/571/);
     });
     check('gap: alerts carry the possible-gap note', () => {
+      assert.ok(r.sent.length >= 10, 'expected at least 10 alerts');
       assert.ok(r.sent.slice(0, 10).every((m) => /may have been missed/i.test(m.text)), r.sent[0].text);
     });
     r = await runPhase(w.id, 'cap');
