@@ -144,6 +144,17 @@ keywords** node:
   `workflow.json` for em dashes and American spellings.
 - `npm run build` regenerates `workflow.json` from the Code node sources in
   `src/`; a test fails if the committed file is stale.
+- `npm run fixtures` regenerates `fixtures/examplechannel.items.json` and
+  `fixtures/none.items.json` from the matching HTML fixtures, using the same
+  Cheerio that the shipped HTML nodes use. It needs `N8N_NODES_BASE` set to a
+  local n8n install's `n8n-nodes-base/dist/nodes` directory, so Cheerio can be
+  loaded from that install.
+- `npm run samples` regenerates the golden fixture
+  (`tests/golden/examplechannel-alerts.json`) and the sample files under
+  `samples/`, offline, by driving the shipped Code nodes directly. Re-run both
+  `npm run fixtures` and `npm run samples` after editing
+  `fixtures/examplechannel.html`, so the fixture items and samples stay in
+  step with it.
 - The node-version check (every node type and typeVersion exists in the
   installed n8n) needs a local n8n install; set `N8N_NODES_BASE` to its
   `n8n-nodes-base/dist/nodes` directory to run it, otherwise it is reported
