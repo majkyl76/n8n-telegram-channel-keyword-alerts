@@ -1,0 +1,16 @@
+{
+  "name": "n8n-telegram-channel-keyword-alerts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "n8n template: send Telegram alerts for keyword matches in public Telegram channels",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "fixtures": "node scripts/make-fixture-items.mjs",
+    "samples": "node scripts/make-samples.mjs",
+    "test": "node --test",
+    "lint:copy": "node scripts/lint-copy.mjs",
+    "e2e": "node scripts/e2e.mjs"
+  },
+  "license": "MIT"
+}
