@@ -13,7 +13,7 @@ Run on 2026-10-27 (Europe/Warsaw) with Node 24.22.1 and a local n8n 2.44.7.
 | AC10 | Empty or failing channels | `npm test` | pass | `tests/channel-problems.test.mjs` |
 | AC11 | Message format and escaping | `npm test` | pass | `tests/message-format.test.mjs` |
 | AC12, AC13 | Honest limits, copy quality | `npm test`, `npm run lint:copy` | pass, clean | `tests/guidelines.test.mjs` |
-| AC14 | Live run in local n8n | `N8N_URL=... N8N_API_KEY=... npm run e2e` | 12 of 12 checks pass, three runs in a row after review 2 | `samples/e2e-run.txt` |
+| AC14 | Live run in local n8n | `N8N_URL=... N8N_API_KEY=... npm run e2e` | 12 of 12 checks pass, re-run by the PM against local n8n 2.44.7 after the final review fixes | `samples/e2e-run.txt` |
 
 Unit tests: 85 run, 85 pass, 0 fail (`npm test`, 27 Oct 2026, after the final review: hyphenated keywords, surrogate-safe truncation, string `lastSeen`).
 
