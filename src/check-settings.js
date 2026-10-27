@@ -49,8 +49,13 @@ if (rawChannels.length === 0) {
   throw new Error('Add at least one channel in "Set up your channels and keywords".');
 }
 
-const max = Number(cfg.maxAlertsPerRun);
-if (!Number.isInteger(max) || max < 1) {
+// Only a number or a numeric string is accepted: Number() would otherwise silently
+// coerce a boolean (Number(true) === 1) or a single-element array (Number([5]) === 5)
+// into a valid-looking integer.
+const maxRaw = cfg.maxAlertsPerRun;
+const maxIsNumberOrString = typeof maxRaw === 'number' || typeof maxRaw === 'string';
+const max = maxIsNumberOrString ? Number(maxRaw) : NaN;
+if (!maxIsNumberOrString || !Number.isInteger(max) || max < 1) {
   throw new Error('maxAlertsPerRun must be a positive whole number. Got: ' + String(cfg.maxAlertsPerRun));
 }
 
