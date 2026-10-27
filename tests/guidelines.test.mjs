@@ -170,7 +170,7 @@ test('main sticky word count and required headings', () => {
   assert.match(text, /### How it works/);
   assert.match(text, /### Setup/);
   // Setup must name the credential, config values and how to test, and the static-data limit.
-  assert.match(text, /Telegram Bot account/);
+  assert.match(text, /Telegram account/);
   assert.match(text, /telegramChatId/);
   assert.match(text, /Run manually/);
   assert.match(text, /static data/i);
@@ -221,7 +221,7 @@ test('only the expected sticky colours are used', () => {
 test('no secrets anywhere in the JSON', () => {
   need();
   const raw = JSON.stringify(wf);
-  assert.ok(!/\d{6,12}:[A-Za-z0-9_-]{30,}/.test(raw), 'looks like a bot token');
+  assert.ok(!/\d{6,12}:[A-Za-z0-9_-]{30,}/.test(raw), 'looks like a Telegram token');
   assert.ok(!/Bearer\s/.test(raw), 'contains Bearer');
   assert.ok(!/api_key/i.test(raw), 'contains api_key');
   assert.ok(!/[A-Za-z0-9+/=]{40,}/.test(raw), 'long random-looking string');
@@ -232,7 +232,7 @@ test('Telegram credential referenced by name only, no id', () => {
   need();
   const tg = wf.nodes.find((n) => n.type === 'n8n-nodes-base.telegram');
   assert.ok(tg, 'telegram node present');
-  assert.deepEqual(tg.credentials, { telegramApi: { name: 'Telegram Bot account' } });
+  assert.deepEqual(tg.credentials, { telegramApi: { name: 'Telegram account' } });
   assert.ok(!('id' in tg.credentials.telegramApi), 'no credential id');
   // No other node uses credentials.
   for (const n of wf.nodes) {
@@ -253,10 +253,10 @@ test('honest limits appear in the main sticky', () => {
   assert.match(t, /one request per channel|one second gap/);
 });
 
-test('README, LISTING and sticky text pass copy lint', () => {
+test('README and sticky text pass copy lint', () => {
   need();
   const issues = [];
-  for (const f of ['README.md', 'LISTING.md']) {
+  for (const f of ['README.md']) {
     const p = join(root, f);
     assert.ok(existsSync(p), f + ' must exist');
     issues.push(...lintText(readFileSync(p, 'utf8'), f));

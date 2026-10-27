@@ -199,7 +199,7 @@ const nodes = [
       text: '={{ $json.text }}',
       additionalFields: { parse_mode: 'HTML', disable_web_page_preview: true, appendAttribution: false },
     },
-    credentials: { telegramApi: { name: 'Telegram Bot account' } },
+    credentials: { telegramApi: { name: 'Telegram account' } },
     retryOnFail: true,
     maxTries: 3,
     waitBetweenTries: 2000,
@@ -213,21 +213,21 @@ const nodes = [
 const mainSticky = [
   '## Telegram public channel keyword alerts',
   '',
-  'Watch public Telegram channels and get a Telegram message when a post matches your keywords.',
+  'Watches public Telegram channels and messages you on Telegram when a post matches your keywords.',
   '',
   '### How it works',
-  'Every 15 minutes the workflow reads the public web preview at t.me/s/<channel> for each channel you list, parses the latest posts (about 20), keeps the ones newer than the last post it saw, filters by your keywords, and sends one message per match. It remembers the last post per channel in workflow static data, so you are not alerted twice.',
+  'Every 15 minutes it reads the public web preview at t.me/s/<channel> for each channel you list and parses the latest posts (about 20). It keeps the ones newer than the last post it saw, checks them against your keywords and sends one message per match. The last post per channel is stored in workflow static data, so you are not alerted twice.',
   '',
   '### Setup',
-  '1. Connect a Telegram credential named "Telegram Bot account" (create a bot with @BotFather).',
+  '1. Connect a Telegram credential named "Telegram account" (the token comes from @BotFather).',
   '2. Open "Set up your channels and keywords" and edit: channels (one per line), keywords (one per line), optional excludeKeywords, matchWholeWords, telegramChatId, maxAlertsPerRun, baselineOnFirstRun.',
-  '3. Set telegramChatId: message your bot, then read the chat id from the Telegram API.',
-  '4. Test with "Run manually". Note: manual runs do not save dedupe state, so a manual test alerts again each time. State is saved only when the workflow is active and runs from the schedule.',
+  '3. Set telegramChatId: send a message to the account you made with @BotFather, then read the chat id from the Telegram API.',
+  '4. Test with "Run manually". Manual runs do not save state, so a manual test alerts again each time. State is only saved when the workflow is active and started by the schedule.',
   '',
   '### Customization',
-  'Swap the last node for Slack, email or any other channel. Raise the schedule frequency if a busy channel scrolls posts off the preview.',
+  'You can replace the last node with Slack, email or something else. If a busy channel scrolls posts off the preview between runs, shorten the schedule.',
   '',
-  'Limits: only public channels with a web preview work, the preview shows roughly the latest 20 posts, and Telegram may change the HTML. This is polite scraping: one request per channel with a one second gap.',
+  'Limits: only public channels with a web preview work, the preview shows roughly the latest 20 posts, and Telegram may change the HTML. It does not hammer Telegram: one request per channel with a one second gap.',
 ].join('\n');
 
 const stickies = [
@@ -277,7 +277,7 @@ const stickies = [
     color: 3,
     content: [
       '### Set this first',
-      'Add your Telegram chat id and connect the bot credential before you activate. Without them the Telegram node cannot send.',
+      'Add your Telegram chat id and connect the Telegram credential before you activate. Without them the Telegram node cannot send.',
     ].join('\n'),
   },
 ];
