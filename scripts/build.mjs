@@ -207,6 +207,9 @@ const nodes = [
 ];
 
 // --- sticky notes -----------------------------------------------------------
+// Sticky Note colour numbers (n8n-nodes-base.stickyNote): 1 = yellow, 3 = red,
+// 7 = neutral/white. This template uses one yellow overview sticky, three
+// white section stickies, and one red warning sticky on the Telegram node.
 const mainSticky = [
   '## Telegram public channel keyword alerts',
   '',
