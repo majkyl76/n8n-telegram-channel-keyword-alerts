@@ -83,8 +83,8 @@ install is absent.
 ## Exact `npm test` output
 
 ```
-ℹ tests 73
-ℹ pass 73
+ℹ tests 77
+ℹ pass 77
 ℹ fail 0
 ℹ skipped 0
 ℹ duration_ms ~400

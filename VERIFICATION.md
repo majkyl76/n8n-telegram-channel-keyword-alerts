@@ -15,7 +15,7 @@ Run on 2026-10-27 (Europe/Warsaw) with Node 24.22.1 and a local n8n 2.44.7.
 | AC12, AC13 | Honest limits, copy quality | `npm test`, `npm run lint:copy` | pass, clean | `tests/guidelines.test.mjs` |
 | AC14 | Live run in local n8n | `N8N_URL=... N8N_API_KEY=... npm run e2e` | 12 of 12 checks pass, three runs in a row after review 2 | `samples/e2e-run.txt` |
 
-Unit tests: 73 run, 73 pass, 0 fail (`npm test`, 27 Oct 2026, after review 2).
+Unit tests: 77 run, 77 pass, 0 fail (`npm test`, 27 Oct 2026, after review 3: duplicate post ids, boolean cap, emoji alt order).
 
 ## What the live run exercised
 
