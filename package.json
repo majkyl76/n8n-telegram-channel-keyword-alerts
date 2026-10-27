@@ -4,6 +4,9 @@
   "private": true,
   "description": "n8n template: send Telegram alerts for keyword matches in public Telegram channels",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "node scripts/build.mjs",
     "fixtures": "node scripts/make-fixture-items.mjs",
