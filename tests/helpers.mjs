@@ -3,7 +3,6 @@
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import vm from 'node:vm';
 
 export const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -32,10 +31,14 @@ export function fixture(name) {
   return JSON.parse(readFileSync(join(root, 'fixtures', name), 'utf8'));
 }
 
-// Run a Code node body, allowing its top-level `return`.
+// Run a Code node body, allowing its top-level `return`. Using `new Function`
+// (not node:vm) keeps returned objects in this realm, so assert.deepEqual works.
+// n8n globals are injected as parameters; any other global name (e.g. $testExpose
+// when not provided) is simply undeclared, and `typeof` on it stays safe.
 function runBody(jsCode, sandbox) {
-  const ctx = vm.createContext({ console, ...sandbox });
-  return vm.runInContext(`(function(){\n${jsCode}\n})()`, ctx);
+  const names = Object.keys(sandbox);
+  const fn = new Function(...names, 'console', jsCode);
+  return fn(...names.map((n) => sandbox[n]), console);
 }
 
 // Run "Check settings and list channels" with a config object as the single input item.
@@ -97,6 +100,22 @@ export function channelConfig(channel, overrides = {}) {
     chatId: '12345',
     ...overrides,
   };
+}
+
+// Golden config used by both the golden test and the samples generator.
+export const GOLDEN_CONFIG = {
+  keywords: ['AI', 'Telegram'],
+  excludeKeywords: [],
+  matchWholeWords: true,
+  maxAlertsPerRun: 5,
+  baselineOnFirstRun: false,
+  chatId: '12345',
+};
+
+export function runGolden() {
+  const inputItems = fixture('durov.items.json');
+  const channelItems = [channelConfig('durov', GOLDEN_CONFIG)];
+  return runFindNew({ inputItems, channelItems, staticData: {} }).out;
 }
 
 // Collect every typeVersion number declared for a node type in the installed n8n.
