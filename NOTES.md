@@ -62,6 +62,15 @@ SPEC.md (the contract) and CLAUDE.md (the conventions).
   raw `href` the HTML node pulls from the page is ignored, so a hostile href cannot reach
   any message.
 
+- **`maxTries` is n8n's total attempt count, not a retry count.** The HTTP node's
+  `maxTries: 2` and the Telegram node's `maxTries: 3` therefore give 1 and 2 retries
+  after the first try, not 2 and 3 as SPEC's wording ("retry on fail 2/3 times") might
+  suggest. Confirmed by reading `n8n-core/dist/execution-engine/workflow-execute.js`:
+  `getRetryParams()` clamps to a minimum of 2, and the attempt loop runs `tryIndex <
+  maxTries` times in total. Left the node settings as shipped (final review, F4): they
+  still retry, just by one fewer attempt than the wording implied. Raise `maxTries` to
+  3 (HTTP) and 4 (Telegram) if more retries are wanted.
+
 ## Node versions used (all present in the installed n8n 2.44.7)
 
 scheduleTrigger 1.2, manualTrigger 1, set 3.5, code 2, httpRequest 4.2, html 1.2,
@@ -79,12 +88,17 @@ install is absent.
   The unit tests assume that shape; `scripts/e2e.mjs` (AC14) proves the real nodes.
 - That `$getWorkflowStaticData('global')` persists across scheduled runs as expected
   (documented n8n behaviour, not exercised here).
+- Whether a forwarded post (a second, nested `.tgme_widget_message` for the original
+  message inside one wrap) is parsed as one post or two. `fixtures/durov.html` has no
+  forwarded post, so the "Extract fields from each post" node's selectors are untested
+  against that shape (final review, known gap). Capturing one real forwarded post into
+  `fixtures/` would close this.
 
 ## Exact `npm test` output
 
 ```
-ℹ tests 77
-ℹ pass 77
+ℹ tests 85
+ℹ pass 85
 ℹ fail 0
 ℹ skipped 0
 ℹ duration_ms ~400

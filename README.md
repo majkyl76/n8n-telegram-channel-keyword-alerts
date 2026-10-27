@@ -75,6 +75,8 @@ email (SMTP) or webhook node. Each outgoing item carries `chatId` and a ready-ma
 - No message: check the bot token, the chat id, and that you have messaged the bot at
   least once.
 - Alerts repeat on every manual run: expected, because manual runs do not save state.
+- Retries: n8n counts `maxTries` as the total number of attempts, so the HTTP node
+  retries once and the Telegram node retries twice after the first try.
 
 ## Tests
 
