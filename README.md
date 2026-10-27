@@ -67,6 +67,9 @@ email (SMTP) or webhook node. Each outgoing item carries `chatId` and a ready-ma
 - Telegram can change the preview HTML, which may need the selectors updated.
 - This is polite scraping: one request per channel per run, with a one second gap and
   the default 15 minute schedule.
+- A forwarded post is parsed like any other post: the forwarded content becomes the
+  alert text and snippet, and the "Forwarded from" label is not matched against your
+  keywords.
 
 ## Troubleshooting
 
@@ -86,8 +89,8 @@ regenerates `workflow.json` from `src/`. `npm run lint:copy` checks the writing.
 ## Live import test
 
 Imported unchanged into a local n8n 2.44.7 through the public API, then activated with
-the schedule patched to 10 seconds. A mock preview server (built from a real captured
-`t.me/s/` page) and a mock Telegram Bot API ran on localhost. All 12 end-to-end checks
+the schedule patched to 10 seconds. A mock preview server (built from a `t.me/s/` page
+fixture) and a mock Telegram Bot API ran on localhost. All 12 end-to-end checks
 passed: baseline, new matches, no repeats, the alert cap with a "+2 more" summary, the
-gap note, and a dead channel or a dropped connection not stopping the others. The real Telegram Bot API was
-not called. See `samples/e2e-run.txt` and `VERIFICATION.md`.
+gap note, and a dead channel or a dropped connection not stopping the others. The real
+Telegram Bot API was not called. See `samples/e2e-run.txt`.
